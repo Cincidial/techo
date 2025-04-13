@@ -15,7 +15,40 @@
 </head>
 
 <body id="body">
-    <h1>Techo</h1>
+    <div class="nav">
+        <button type="button" class="topNavButton">Team</button>
+        <button type="button" class="topNavButton">Pokemon</button>
+        <button type="button" class="topNavButton">Moves</button>
+        <button type="button" class="topNavButton">Abilities</button>
+        <button type="button" class="topNavButton">Items</button>
+        <button type="button" class="topNavButton">Tribes</button>
+        <button type="button" class="topNavButton">Type Chart</button>
+        <hr>
+    </div>
+
+    <div id="TypeChart" class="tabSheet">
+        <table id="typeChartTable" class="typeChartTable">
+            <thead>
+                <tr id="typeChartTableTheadRow">
+                    <th class="typeChartTopLeft">
+                        Defense →
+                        <br>
+                        Attack ↴
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
 </body>
+
+<template id="pokemonTypeChartHeaderTemplate">
+    <td id="cell" class="typeChartThead"><img id="img" /></td>
+</template>
+
+<template id="pokemonTypeChartRowTemplate">
+    <tr id="row">
+        <td class="typeChartAttack"><img id="img" /></td>
+    </tr>
+</template>
 
 </html>

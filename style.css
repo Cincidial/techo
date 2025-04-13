@@ -5,11 +5,66 @@
 
 html * {
     font-size: 16px;
-    line-height: 1.625;
-    color: white;
+    color: #FFD166;
     font-family: 'tectonic';
 }
 
 body {
-    background-color: darkgray;
+    background-color: #212121;
+}
+
+.nav {
+    text-align: center;
+    padding: 5px 10px;
+    width: max-content;
+    margin: auto;
+}
+
+.topNavButton {
+    background-color: #808080;
+    border: none;
+    padding: 10px;
+    font-size: 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 10px;
+    margin: 0px 10px;
+}
+
+.topNavButton:hover {
+    background-color: #FFD166;
+    color: black;
+}
+
+.tabSheet {
+    text-align: center;
+}
+
+.typeChartTable {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+.typeChartTopLeft {
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+.typeChartThead {
+    vertical-align: bottom;
+}
+
+.typeChartAttack {
+    text-align: right;
+}
+
+.typeChartCell {
+    color: #000000;
+    border: 1px solid #545454;
+    font-size: 20px;
 }

@@ -11,8 +11,10 @@ async function main() {
     let tectonicData = [
         standardFilesParser([tectonicFiles[0]], parsePokemonTypes)
     ]
+    let typeChart = buildTypeChart(tectonicData[0])
 
     console.log(tectonicData)
+    console.log(typeChart)
 }
 
 ///////////////////////////////
@@ -34,7 +36,7 @@ function standardFilesParser(files, dataParser) {
                 pairs.length = 0
             } else if (!line.includes("#") && line.length > 0) {
                 if (line.startsWith("[")) {
-                    const value = line.substring(1, line.length - 2)
+                    const value = line.substring(1, line.length - 1)
                     pairs.push({ key: "num", value: value })
                 } else {
                     const split = line.split('=')
@@ -59,6 +61,12 @@ function standardFilesParser(files, dataParser) {
 
 function parsePokemonTypes(pairs) {
     let obj = {
+        index: -1,
+        name: "",
+        key: "",
+        weaknesses: "",
+        resistances: "",
+        immunities: "",
         isRealType: true
     }
     pairs.forEach(pair => {
@@ -90,6 +98,63 @@ function parsePokemonTypes(pairs) {
     return obj
 }
 
+function buildTypeChart(types) {
+    const typeChart = []
+    types.forEach(_ => {
+        typeChart.push(Array(types.size).fill(1.0))
+    })
+
+    const typeChartTableTheadRow = document.getElementById("typeChartTableTheadRow")
+    const typeChartTable = document.getElementById("typeChartTable")
+
+    types.forEach(attacker => {
+        let imgSrc = `resources/types/${attacker.key}.png`
+        let attackerNode = pokemonTypeChartRowTemplate.cloneNode(true)
+        let row = attackerNode.getElementById("row")
+        attackerNode.getElementById("img").src = imgSrc
+
+        types.forEach(defender => {
+            let backgroundColor = "transparent"
+            let effectiveness = ""
+            let title = "Normal Effectiveness"
+
+            if (defender.weaknesses.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 2.0
+                backgroundColor = "#2E8B57"
+                effectiveness = "2"
+                title = "Super Effective"
+            } else if (defender.resistances.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 0.5
+                backgroundColor = "#F7BE81"
+                effectiveness = "½"
+                title = "Not Very Effective"
+            } else if (defender.immunities.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 0.0
+                backgroundColor = "#b04f4a"
+                effectiveness = "0"
+                title = "No Effect"
+            }
+
+            if (defender.isRealType) {
+                let cell = row.insertCell(row.length)
+                cell.classList.add("typeChartCell")
+                cell.style.backgroundColor = backgroundColor
+                cell.title = `${attacker.name} → ${defender.name} = ${title}`
+                cell.innerHTML = effectiveness
+            }
+        })
+
+        if (attacker.isRealType) {
+            let headerNode = pokemonTypeChartHeaderTemplate.cloneNode(true)
+            headerNode.getElementById("img").src = imgSrc
+            typeChartTableTheadRow.append(headerNode)
+            typeChartTable.append(attackerNode)
+        }
+    })
+
+    return typeChart
+}
+
 ///////////////////////////////
 // Helpers
 ///////////////////////////////
@@ -105,7 +170,14 @@ async function fileFetch(path) {
     return await response.text()
 }
 
+function getTemplate(id) {
+    return document.getElementById(id).content
+}
+
 ///////////////////////////////
 // Start
 ///////////////////////////////
-main();
+const pokemonTypeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
+const pokemonTypeChartRowTemplate = getTemplate("pokemonTypeChartRowTemplate")
+
+main()

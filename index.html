@@ -16,49 +16,93 @@
 
 <body id="body">
     <div class="nav">
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'team')">Team</button>
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'pokemon')">Pokemon</button>
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'moves')">Moves</button>
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'abilities')">Abilities</button>
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'items')">Items</button>
-        <button type="button" class="topNavButton" onclick="swapTab(this, 'tribes')">Tribes</button>
-        <button id="typeChartButton" type="button" class="topNavButton" onclick="swapTab(this, 'typeChart')">Type
-            Chart</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'teamSheet')">Team</button>
+        <button id="pokemonButton" type="button" class="topNavButton topNavButtonSelected"
+            onclick="swapTab(this, 'pokemonSheet')">Pokemon</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'movesSheet')">Moves</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'abilitiesSheet')">Abilities</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'itemsSheet')">Items</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'tribesSheet')">Tribes</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'typeChartSheet')">TypeChart</button>
         <hr>
     </div>
 
-    <div id="team" class="tabSheet gone">
+    <div id="teamSheet" class="tabSheet gone">
         Team
     </div>
 
-    <div id="pokemon" class="tabSheet gone">
-        Pokemon
-    </div>
-
-    <div id="moves" class="tabSheet gone">
-        Moves
-    </div>
-
-    <div id="abilities" class="tabSheet gone">
-        Abilities
-    </div>
-
-    <div id="items" class="tabSheet gone">
-        Items
-    </div>
-
-    <div id="tribes" class="tabSheet gone">
-        <table id="tribesTable" class="standardTable">
+    <div id="pokemonSheet" class="tabSheet">
+        <table id="pokemonTable" class="standardTable">
             <thead>
                 <tr>
-                    <th class="standardThead">Name</th>
-                    <th class="standardThead">Description</th>
+                    <th class="standardThead">Pokemon</th>
+                    <th class="standardThead">Types</th>
+                    <th class="standardThead">Abilities</th>
+                    <th class="standardThead">Tribes</th>
+                    <th class="standardThead">HP</th>
+                    <th class="standardThead">Atk</th>
+                    <th class="standardThead">Def</th>
+                    <th class="standardThead">SpA</th>
+                    <th class="standardThead">SpD</th>
+                    <th class="standardThead">Spe</th>
+                    <th class="standardThead">BST</th>
                 </tr>
             </thead>
         </table>
     </div>
 
-    <div id="typeChart" class="tabSheet">
+    <div id="movesSheet" class="tabSheet gone">
+        <table id="movesTable" class="standardTable">
+            <thead>
+                <tr>
+                    <th class="standardThead">Name</th>
+                    <th class="standardThead">Type</th>
+                    <th class="standardThead">Split</th>
+                    <th class="standardThead">Power</th>
+                    <th class="standardThead">Acc</th>
+                    <th class="standardThead">PP</th>
+                    <th class="standardThead">Prio</th>
+                    <th class="standardThead">Effect</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="abilitiesSheet" class="tabSheet gone">
+        <table id="abilitiesTable" class="standardTable">
+            <thead>
+                <tr>
+                    <th class="standardThead">Name</th>
+                    <th class="standardThead">Effect</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="itemsSheet" class="tabSheet gone">
+        <table id="itemsTable" class="standardTable">
+            <thead>
+                <tr>
+                    <th class="standardThead"></th>
+                    <th class="standardThead">Name</th>
+                    <th class="standardThead">Effect</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="tribesSheet" class="tabSheet gone">
+        <table id="tribesTable" class="standardTable">
+            <thead>
+                <tr>
+                    <th class="standardThead">Name</th>
+                    <th class="standardThead">Effect</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="typeChartSheet" class="tabSheet gone">
         <table id="typeChartTable" class="typeChartTable">
             <thead>
                 <tr id="typeChartTableTheadRow">
@@ -73,6 +117,65 @@
     </div>
 </body>
 
+<template id="pokemonRowTemplate">
+    <tr>
+        <td class="fontMedium standardCell">
+            <img id="icon" width="100" />
+            <br>
+            <span id="name"></span>
+        </td>
+        <td class="fontMedium boldCell">
+            <img id="type1" />
+            <br>
+            <img id="type2" />
+        </td>
+        <td id="abilities" class="fontMedium boldCell"></td>
+        <td id="tribes" class="fontMedium boldCell"></td>
+        <td id="hp" class="fontMedium boldCell"></td>
+        <td id="attack" class="fontMedium boldCell"></td>
+        <td id="defense" class="fontMedium boldCell"></td>
+        <td id="spA" class="fontMedium boldCell"></td>
+        <td id="spD" class="fontMedium boldCell"></td>
+        <td id="speed" class="fontMedium boldCell"></td>
+        <td id="bst" class="fontMedium boldCell"></td>
+    </tr>
+</template>
+
+<template id="moveRowTemplate">
+    <tr>
+        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td class="fontMedium standardCell"><img id="type" /></td>
+        <td class="fontMedium standardCell"><img id="split" /></td>
+        <td id="power" class="fontMedium standardCell"></td>
+        <td id="acc" class="fontMedium standardCell"></td>
+        <td id="pp" class="fontMedium standardCell"></td>
+        <td id="prio" class="fontMedium standardCell"></td>
+        <td id="description" class="fontMedium textLeft standardCell"></td>
+    </tr>
+</template>
+
+<template id="abilityRowTemplate">
+    <tr>
+        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td id="description" class="fontMedium textLeft standardCell"></td>
+    </tr>
+</template>
+
+<template id="itemRowTemplate">
+    <tr>
+        <td class="fontMedium standardCell"><img id="icon" /></td>
+        <td id="name" class="fontMedium boldCell"></td>
+        <td id="description" class="fontMedium textLeft standardCell"></td>
+    </tr>
+</template>
+
+<template id="tribeRowTemplate">
+    <tr>
+        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td id="description" class="fontMedium textLeft standardCell"></td>
+    </tr>
+</template>
+
 <template id="pokemonTypeChartHeaderTemplate">
     <td id="cell" class="typeChartThead"><img id="img" /></td>
 </template>
@@ -80,13 +183,6 @@
 <template id="pokemonTypeChartRowTemplate">
     <tr id="row">
         <td class="typeChartAttack"><img id="img" /></td>
-    </tr>
-</template>
-
-<template id="tribeRowTemplate">
-    <tr>
-        <td id="name" class="fontMedium standardCell borderRight"></td>
-        <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
 </template>
 

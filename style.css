@@ -13,6 +13,12 @@ body {
     background-color: #212121;
 }
 
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #212121;
+}
+
 .gone {
     display: none;
 }
@@ -80,7 +86,7 @@ body {
     vertical-align: middle;
     box-sizing: border-box;
     border-spacing: 10px;
-    width: 35vw;
+    width: 800px;
 }
 
 .standardThead {
@@ -93,6 +99,13 @@ body {
     padding-bottom: 5px;
     border-bottom: 1px solid #545454;
     line-height: 1.2;
+}
+
+.boldCell {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #545454;
+    line-height: 1.2;
+    font-weight: bolder;
 }
 
 .typeChartTable {

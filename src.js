@@ -4,17 +4,16 @@
 async function main() {
     let tectonicFiles = []
     await Promise.all([
-        fileFetch("PBS/types.txt")
+        fileFetch("PBS/types.txt"),
+        fileFetch("PBS/tribes.txt"),
     ]).then((values) => tectonicFiles.push(...values))
         .catch((error) => console.error(error))
 
-    let tectonicData = [
-        standardFilesParser([tectonicFiles[0]], parsePokemonTypes)
-    ]
-    let typeChart = buildTypeChart(tectonicData[0])
+    let types = standardFilesParser([tectonicFiles[0]], parsePokemonTypes)
+    let tribes = parseTribes(tectonicFiles[1])
 
-    console.log(tectonicData)
-    console.log(typeChart)
+    let typeChart = buildTypeChart(types)
+    buildTribes(tribes)
 }
 
 ///////////////////////////////
@@ -98,14 +97,51 @@ function parsePokemonTypes(pairs) {
     return obj
 }
 
+function parseTribes(file) {
+    const map = new Map()
+    file.split(/\r?\n/).filter(line => line.length > 0).forEach(line => {
+        let obj = {
+            key: "",
+            activationCount: 5,
+            name: "",
+            description: "",
+        }
+
+        const split = line.split(',')
+        obj.key = split[0]
+        obj.activationCount = parseInt(split[1])
+        obj.name = obj.key[0] + obj.key.substring(1).toLowerCase()
+        obj.description = split[2].replaceAll('"', "")
+
+        map.set(obj.key, obj)
+    })
+
+    return map
+}
+
+///////////////////////////////
+// UI
+///////////////////////////////
+function swapTab(button, newTabId) {
+    currentTab.classList.add("gone")
+    currentTab = document.getElementById(newTabId)
+    currentTab.classList.remove("gone")
+
+    currentTabButton.classList.remove("topNavButtonSelected")
+    currentTabButton = button
+    currentTabButton.classList.add("topNavButtonSelected")
+}
+
 function buildTypeChart(types) {
+    const pokemonTypeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
+    const pokemonTypeChartRowTemplate = getTemplate("pokemonTypeChartRowTemplate")
+    const typeChartTableTheadRow = document.getElementById("typeChartTableTheadRow")
+    const typeChartTable = document.getElementById("typeChartTable")
+
     const typeChart = []
     types.forEach(_ => {
         typeChart.push(Array(types.size).fill(1.0))
     })
-
-    const typeChartTableTheadRow = document.getElementById("typeChartTableTheadRow")
-    const typeChartTable = document.getElementById("typeChartTable")
 
     types.forEach(attacker => {
         let imgSrc = `resources/types/${attacker.key}.png`
@@ -155,9 +191,26 @@ function buildTypeChart(types) {
     return typeChart
 }
 
+function buildTribes(tribes) {
+    const template = getTemplate("tribeRowTemplate")
+    const table = document.getElementById("tribesTable")
+
+    tribes.forEach(tribe => {
+        let node = template.cloneNode(true)
+
+        node.getElementById("name").innerHTML = tribe.name
+        node.getElementById("description").innerHTML = tribe.description
+        table.append(node)
+    })
+}
+
 ///////////////////////////////
 // Helpers
 ///////////////////////////////
+function getTemplate(id) {
+    return document.getElementById(id).content
+}
+
 async function fileFetch(path) {
     const baseUrl = "https://raw.githubusercontent.com/xeuorux/Pokemon-Tectonic/refs/heads/main/"
     const fullPath = baseUrl + path
@@ -170,14 +223,10 @@ async function fileFetch(path) {
     return await response.text()
 }
 
-function getTemplate(id) {
-    return document.getElementById(id).content
-}
-
 ///////////////////////////////
 // Start
 ///////////////////////////////
-const pokemonTypeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
-const pokemonTypeChartRowTemplate = getTemplate("pokemonTypeChartRowTemplate")
+let currentTab = document.getElementById("typeChart")
+let currentTabButton = document.getElementById("typeChartButton")
 
 main()

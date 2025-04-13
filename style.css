@@ -13,6 +13,34 @@ body {
     background-color: #212121;
 }
 
+.gone {
+    display: none;
+}
+
+.fontLarge {
+    font-size: 22px;
+}
+
+.fontMedium {
+    font-size: 19px;
+}
+
+.textLeft {
+    text-align: left;
+}
+
+.textRight {
+    text-align: right;
+}
+
+.borderRight {
+    border-right: 1px solid #545454;
+}
+
+.borderBottom {
+    border-bottom: 1px solid #545454;
+}
+
 .nav {
     text-align: center;
     padding: 5px 10px;
@@ -37,8 +65,34 @@ body {
     color: black;
 }
 
+.topNavButtonSelected {
+    background-color: #FFD166 !important;
+    color: black !important;
+}
+
 .tabSheet {
     text-align: center;
+}
+
+.standardTable {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border-spacing: 10px;
+    width: 35vw;
+}
+
+.standardThead {
+    font-size: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #545454;
+}
+
+.standardCell {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #545454;
+    line-height: 1.2;
 }
 
 .typeChartTable {
@@ -57,6 +111,7 @@ body {
 
 .typeChartThead {
     vertical-align: bottom;
+    width: 10px;
 }
 
 .typeChartAttack {

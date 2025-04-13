@@ -16,17 +16,49 @@
 
 <body id="body">
     <div class="nav">
-        <button type="button" class="topNavButton">Team</button>
-        <button type="button" class="topNavButton">Pokemon</button>
-        <button type="button" class="topNavButton">Moves</button>
-        <button type="button" class="topNavButton">Abilities</button>
-        <button type="button" class="topNavButton">Items</button>
-        <button type="button" class="topNavButton">Tribes</button>
-        <button type="button" class="topNavButton">Type Chart</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'team')">Team</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'pokemon')">Pokemon</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'moves')">Moves</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'abilities')">Abilities</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'items')">Items</button>
+        <button type="button" class="topNavButton" onclick="swapTab(this, 'tribes')">Tribes</button>
+        <button id="typeChartButton" type="button" class="topNavButton" onclick="swapTab(this, 'typeChart')">Type
+            Chart</button>
         <hr>
     </div>
 
-    <div id="TypeChart" class="tabSheet">
+    <div id="team" class="tabSheet gone">
+        Team
+    </div>
+
+    <div id="pokemon" class="tabSheet gone">
+        Pokemon
+    </div>
+
+    <div id="moves" class="tabSheet gone">
+        Moves
+    </div>
+
+    <div id="abilities" class="tabSheet gone">
+        Abilities
+    </div>
+
+    <div id="items" class="tabSheet gone">
+        Items
+    </div>
+
+    <div id="tribes" class="tabSheet gone">
+        <table id="tribesTable" class="standardTable">
+            <thead>
+                <tr>
+                    <th class="standardThead">Name</th>
+                    <th class="standardThead">Description</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="typeChart" class="tabSheet">
         <table id="typeChartTable" class="typeChartTable">
             <thead>
                 <tr id="typeChartTableTheadRow">
@@ -48,6 +80,13 @@
 <template id="pokemonTypeChartRowTemplate">
     <tr id="row">
         <td class="typeChartAttack"><img id="img" /></td>
+    </tr>
+</template>
+
+<template id="tribeRowTemplate">
+    <tr>
+        <td id="name" class="fontMedium standardCell borderRight"></td>
+        <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
 </template>
 

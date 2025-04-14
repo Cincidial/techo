@@ -115,14 +115,27 @@
             </thead>
         </table>
     </div>
+
+    <dialog id="pokemonModal">
+        <div id="name" class="fontExtraLarge"></div>
+        <img id="img" width="160" height="160" />
+        <div>
+            <img id="type1" />
+            <img id="type2" />
+        </div>
+        <table id="evolution">
+
+        </table>
+    </dialog>
 </body>
 
 <template id="pokemonRowTemplate">
-    <tr>
+    <tr onclick="showPokemonModal(this)">
+        <input type="hidden" id="key" value="">
         <td class="fontMedium standardCell">
-            <img id="icon" width="100" />
+            <img id="icon" width="75" />
             <br>
-            <span id="name"></span>
+            <span id="name" class="fontMedium"></span>
         </td>
         <td class="fontMedium boldCell">
             <img id="type1" />
@@ -143,7 +156,7 @@
 
 <template id="moveRowTemplate">
     <tr>
-        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td id="name" class="fontMedium boldCell"></td>
         <td class="fontMedium standardCell"><img id="type" /></td>
         <td class="fontMedium standardCell"><img id="split" /></td>
         <td id="power" class="fontMedium standardCell"></td>
@@ -156,7 +169,7 @@
 
 <template id="abilityRowTemplate">
     <tr>
-        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td id="name" class="fontMedium boldCell"></td>
         <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
 </template>
@@ -171,19 +184,24 @@
 
 <template id="tribeRowTemplate">
     <tr>
-        <td id="name" class="fontMedium boldCell borderRight"></td>
+        <td id="name" class="fontMedium boldCell"></td>
         <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
 </template>
 
 <template id="pokemonTypeChartHeaderTemplate">
-    <td id="cell" class="typeChartThead"><img id="img" /></td>
+    <th id="cell" class="typeChartThead"><img id="img" /></th>
 </template>
 
 <template id="pokemonTypeChartRowTemplate">
     <tr id="row">
         <td class="typeChartAttack"><img id="img" /></td>
     </tr>
+</template>
+
+<template id="pokemonEvolutionTemplate">
+    <img id="icon">
+    <span id="method"></span>
 </template>
 
 </html>

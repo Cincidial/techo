@@ -27,7 +27,7 @@ async function main() {
     let abilities = standardFilesParser([tectonicFiles[2], tectonicFiles[3]], parseAbilities)
     let moves = standardFilesParser([tectonicFiles[4], tectonicFiles[5]], parseMoves)
     let items = filterToHeldItems(standardFilesParser([tectonicFiles[6]], parseItems))
-    let pokemon = standardFilesParser([tectonicFiles[7]], parsePokemon)
+    let pokemon = addAllTribesAndEvolutions(standardFilesParser([tectonicFiles[7]], parsePokemon))
 
     let typeChart = buildTypeChart(types)
     buildTribesUI(tribes)
@@ -298,6 +298,8 @@ function parsePokemon(pairs) {
         lineMoves: [],
         tribes: [],
         evolutions: [], // Note that this is an object of {pokemon, method, condition}
+        wildItems: [],
+        firstEvolution: "",
     }
     pairs.forEach(pair => {
         switch (pair.key) {
@@ -343,6 +345,15 @@ function parsePokemon(pairs) {
             case "Tribes":
                 obj.tribes = pair.value.split(',')
                 break
+            case "WildItemCommon":
+                obj.wildItems.push(pair.value)
+                break
+            case "WildItemUncommon":
+                obj.wildItems.push(pair.value)
+                break
+            case "WildItemRare":
+                obj.wildItems.push(pair.value)
+                break
             case "Evolutions":
                 const evoSplit = pair.value.split(',')
                 const evolutions = []
@@ -355,6 +366,44 @@ function parsePokemon(pairs) {
     })
 
     return obj
+}
+
+function addAllTribesAndEvolutions(pokemon) {
+    pokemon.forEach(mon => {
+        if (mon.firstEvolution.length == 0) {
+            recursivelyAddFirstEvolution(pokemon, mon, mon.key)
+        }
+    })
+
+    pokemon.forEach(mon => {
+        if (mon.tribes.length == 0) {
+            const evoPath = recursivelyFindEvoPath(pokemon, pokemon.get(mon.firstEvolution), mon)
+            const mostRecentEvoWithTribes = evoPath.reverse().find(evo => evo.tribes.length > 0)
+            mon.tribes = mostRecentEvoWithTribes == null ? [] : mostRecentEvoWithTribes.tribes
+        }
+    })
+
+    return pokemon
+}
+
+function recursivelyAddFirstEvolution(pokemon, mon, first) {
+    mon.firstEvolution = first
+    mon.evolutions.forEach(evo => recursivelyAddFirstEvolution(pokemon, pokemon.get(evo.pokemon), first))
+}
+
+function recursivelyFindEvoPath(pokemon, cur, find) {
+    if (cur.key == find.key) {
+        return [cur]
+    }
+
+    for (const evo of cur.evolutions) {
+        const result = recursivelyFindEvoPath(pokemon, pokemon.get(evo.pokemon), find)
+        if (result.length > 0) {
+            return [cur].concat(result)
+        }
+    }
+
+    return []
 }
 
 ///////////////////////////////
@@ -370,6 +419,22 @@ function swapTab(button, newTabId) {
     currentTabButton.classList.add("topNavButtonSelected")
 }
 
+function buildSpanWithTooltip(name, title) {
+    return `<span class="fontMedium" title="${title}">${name}</span>`
+}
+
+function getTypeImgSrc(key) {
+    return `resources/types/${key}.png`
+}
+
+function getItemImgSrc(key) {
+    return `resources/items/${key}.png`
+}
+
+function getPokemonImgSrc(key) {
+    return `resources/pokemon/${key}.png`
+}
+
 function buildTypeChart(types) {
     const pokemonTypeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
     const pokemonTypeChartRowTemplate = getTemplate("pokemonTypeChartRowTemplate")
@@ -382,7 +447,7 @@ function buildTypeChart(types) {
     })
 
     types.forEach(attacker => {
-        let imgSrc = `resources/types/${attacker.key}.png`
+        let imgSrc = getTypeImgSrc(attacker.key)
         let attackerNode = pokemonTypeChartRowTemplate.cloneNode(true)
         let row = attackerNode.getElementById("row")
         attackerNode.getElementById("img").src = imgSrc
@@ -480,8 +545,8 @@ function buildMovesUI(moves) {
         const prioText = move.priority == 0 ? '-' : move.priority
 
         node.getElementById("name").innerHTML = move.name
-        node.getElementById("type").src = `resources/types/${move.type}.png`
-        node.getElementById("split").src = `resources/types/${move.category}.png`
+        node.getElementById("type").src = getTypeImgSrc(move.type)
+        node.getElementById("split").src = getTypeImgSrc(move.category)
         node.getElementById("power").innerHTML = powerText
         node.getElementById("acc").innerHTML = accText
         node.getElementById("pp").innerHTML = move.pp
@@ -497,13 +562,22 @@ function buildPokemonUI(pokemon, abilities, tribes) {
 
     pokemon.forEach(mon => {
         let node = template.cloneNode(true)
-        let monAbilities = mon.abilities.map(x => abilities.get(x).name)
-        let monTribes = mon.tribes.map(x => tribes.get(x).name)
+        let monAbilities = mon.abilities.map(x => {
+            const ability = abilities.get(x)
+            return buildSpanWithTooltip(ability.name, ability.description)
+        })
+        let monTribes = mon.tribes.map(x => {
+            const tribe = tribes.get(x)
+            return buildSpanWithTooltip(tribe.name, tribe.description)
+        })
 
-        node.getElementById("icon").src = `resources/pokemon/${mon.key}.png`
+        node.getElementById("key").value = mon.key
+        node.getElementById("icon").src = getPokemonImgSrc(mon.key)
         node.getElementById("name").innerHTML = mon.name
-        node.getElementById("type1").src = `resources/types/${mon.type1}.png`
-        if (mon.type2.length > 0) { node.getElementById("type2").src = `resources/types/${mon.type2}.png` }
+        node.getElementById("type1").src = getTypeImgSrc(mon.type1)
+        if (mon.type2.length > 0) {
+            node.getElementById("type2").src = getTypeImgSrc(mon.type2)
+        }
         node.getElementById("abilities").innerHTML = `${monAbilities.join("<br>")}`
         node.getElementById("tribes").innerHTML = `${monTribes.join("<br>")}`
         node.getElementById("hp").innerHTML = mon.hp
@@ -517,11 +591,54 @@ function buildPokemonUI(pokemon, abilities, tribes) {
     })
 }
 
+function showPokemonModal(elementWithKey) {
+    const pokemon = tectonicData.pokemon.get(elementWithKey.querySelector("#key").value)
+    const firstEvo = tectonicData.pokemon.get(pokemon.firstEvolution)
+
+    const evoTemplate = getTemplate("pokemonEvolutionTemplate")
+    const dialog = document.getElementById("pokemonModal")
+    const type2 = dialog.querySelector("#type2")
+    const evolutionTable = dialog.querySelector("#evolution")
+
+    dialog.querySelector("#name").innerHTML = pokemon.name
+    dialog.querySelector("#type1").src = getTypeImgSrc(pokemon.type1)
+    if (pokemon.type2.length > 0) {
+        type2.classList.remove("gone")
+        type2.src = getTypeImgSrc(pokemon.type2)
+    } else {
+        type2.classList.add("gone")
+    }
+    dialog.querySelector("#img").src = getPokemonImgSrc(pokemon.key)
+    evolutionTable.innerHTML = `<tr>${recursivelyGetEvolutionUI(evoTemplate, firstEvo)}</tr>`;
+
+    dialog.showModal()
+}
+
+function recursivelyGetEvolutionUI(evoTemplate, evo) {
+    let nodes = []
+    let node = evoTemplate.cloneNode(true)
+    nodes.push(node)
+
+    firstEvo.evolutions.forEach(x => {
+        node = evoTemplate.cloneNode(true)
+        evo.getElementById("icon").src = getPokemonImgSrc(tectonicData.poke)
+    })
+}
+
 ///////////////////////////////
 // Helpers
 ///////////////////////////////
 function getTemplate(id) {
     return document.getElementById(id).content
+}
+
+function setDialogClickListener(id) {
+    const dialog = document.getElementById(id)
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) {
+            dialog.close()
+        }
+    })
 }
 
 async function fileFetch(path) {
@@ -539,4 +656,5 @@ async function fileFetch(path) {
 ///////////////////////////////
 // Start
 ///////////////////////////////
+setDialogClickListener("pokemonModal")
 main()

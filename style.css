@@ -4,7 +4,7 @@
 }
 
 html * {
-    font-size: 16px;
+    font-size: 18px;
     color: #FFD166;
     font-family: 'tectonic';
 }
@@ -53,6 +53,10 @@ dialog:focus {
 
 .fontExtraLarge {
     font-size: 36px;
+}
+
+.paddingLeftSmall {
+    padding-left: 8px;
 }
 
 .textLeft {

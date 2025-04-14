@@ -26,14 +26,15 @@ async function main() {
     let tribes = parseTribes(tectonicFiles[1])
     let abilities = standardFilesParser([tectonicFiles[2], tectonicFiles[3]], parseAbilities)
     let moves = standardFilesParser([tectonicFiles[4], tectonicFiles[5]], parseMoves)
-    let items = filterToHeldItems(standardFilesParser([tectonicFiles[6]], parseItems))
+    let items = standardFilesParser([tectonicFiles[6]], parseItems)
+    let heldItems = filterToHeldItems(items)
     let pokemon = addAllTribesAndEvolutions(standardFilesParser([tectonicFiles[7]], parsePokemon))
 
     let typeChart = buildTypeChart(types)
     buildTribesUI(tribes)
     buildAbilitiesUI(abilities)
     buildMovesUI(moves)
-    buildItemsUI(items)
+    buildItemsUI(heldItems)
     buildPokemonUI(pokemon, abilities, tribes)
 
     tectonicData = {
@@ -43,7 +44,8 @@ async function main() {
         abilities: abilities,
         moves: moves,
         items: items,
-        pokemon: pokemon
+        heldItems: heldItems,
+        pokemon: pokemon,
     }
 }
 
@@ -613,20 +615,24 @@ function showPokemonModal(elementWithKey) {
 
     let evolutionTree = []
     recursivelyGetEvolutionUI(evoTemplate, evolutionTree, 0, firstEvo, null)
-    evolutionRow.innerHTML = "";
-    evolutionTree.forEach(phase => {
-        let cell = evolutionRow.insertCell(evolutionRow.cells.length)
-        let phaseTable = document.createElement("table")
-        let phaseRows = phase.map(node => {
-            row = phaseTable.insertRow(phaseTable.rows.length)
-            row.classList.add("evolutionsTableRow")
-            row.append(node)
+    evolutionRow.innerHTML = ""
+    if (evolutionTree.length > 1) {
+        evolutionTree.forEach(phase => {
+            let cell = evolutionRow.insertCell(evolutionRow.cells.length)
+            let phaseTable = document.createElement("table")
+            phase.forEach(node => {
+                row = phaseTable.insertRow(phaseTable.rows.length)
+                row.classList.add("evolutionsTableRow")
+                row.append(node)
 
-            return row
+                return row
+            })
+
+            cell.append(phaseTable)
         })
-
-        cell.append(phaseTable)
-    })
+    } else {
+        evolutionRow.innerHTML = "Does not evolve";
+    }
 
     dialog.showModal()
 }
@@ -638,11 +644,23 @@ function recursivelyGetEvolutionUI(evoTemplate, nodes, depth, mon, howToEvo) {
 
     let node = evoTemplate.cloneNode(true)
     let nodeMethod = node.getElementById("method")
+    node.getElementById("key").value = mon.key
     node.getElementById("icon").src = getPokemonImgSrc(mon.key)
     node.getElementById("name").innerHTML = mon.name
     nodeMethod.innerHTML = ""
     if (howToEvo != null) {
-        nodeMethod.innerHTML = howToEvo.method
+        if (howToEvo.method == "Item") {
+            const item = tectonicData.items.get(howToEvo.condition)
+            const itemTemplate = getTemplate("pokemonItemEvoTemplate").cloneNode(true)
+
+            itemTemplate.getElementById("icon").src = getItemImgSrc(item.key)
+            itemTemplate.getElementById("name").innerHTML = ` → ${item.name} → `
+            nodeMethod.append(itemTemplate)
+        } else if (howToEvo.method == "Level") {
+            nodeMethod.innerHTML = ` → At level ${howToEvo.condition} → `
+        } else {
+            nodeMethod.innerHTML = ` → ${howToEvo.method} <br> at level ${howToEvo.condition} → `
+        }
     }
 
     nodes[depth].push(node)

@@ -207,11 +207,12 @@
     <td>
         <table class="evolutionsTable">
             <tbody>
-                <tr class="evolutionsTableRow">
+                <tr class="evolutionsTableRow" onclick="showPokemonModal(this)">
+                    <input type="hidden" id="key" value="">
                     <td>
                         <span id="method"></span>
                     </td>
-                    <td>
+                    <td class="paddingLeftSmall">
                         <img id="icon" width="75" height="75">
                         <br>
                         <span id="name"></span>
@@ -220,6 +221,11 @@
             </tbody>
         </table>
     </td>
+</template>
+
+<template id="pokemonItemEvoTemplate">
+    <img id="icon" width="35" height="35">
+    <div id="name"></div>
 </template>
 
 </html>

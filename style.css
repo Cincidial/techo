@@ -160,3 +160,16 @@ dialog:focus {
     border: 1px solid #545454;
     font-size: 20px;
 }
+
+.evolutionsTable {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+.evolutionsTableRow:hover {
+    background-color: transparent
+}

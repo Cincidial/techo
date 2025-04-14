@@ -596,9 +596,10 @@ function showPokemonModal(elementWithKey) {
     const firstEvo = tectonicData.pokemon.get(pokemon.firstEvolution)
 
     const evoTemplate = getTemplate("pokemonEvolutionTemplate")
+
     const dialog = document.getElementById("pokemonModal")
     const type2 = dialog.querySelector("#type2")
-    const evolutionTable = dialog.querySelector("#evolution")
+    const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
     dialog.querySelector("#type1").src = getTypeImgSrc(pokemon.type1)
@@ -609,19 +610,45 @@ function showPokemonModal(elementWithKey) {
         type2.classList.add("gone")
     }
     dialog.querySelector("#img").src = getPokemonImgSrc(pokemon.key)
-    evolutionTable.innerHTML = `<tr>${recursivelyGetEvolutionUI(evoTemplate, firstEvo)}</tr>`;
+
+    let evolutionTree = []
+    recursivelyGetEvolutionUI(evoTemplate, evolutionTree, 0, firstEvo, null)
+    evolutionRow.innerHTML = "";
+    evolutionTree.forEach(phase => {
+        let cell = evolutionRow.insertCell(evolutionRow.cells.length)
+        let phaseTable = document.createElement("table")
+        let phaseRows = phase.map(node => {
+            row = phaseTable.insertRow(phaseTable.rows.length)
+            row.classList.add("evolutionsTableRow")
+            row.append(node)
+
+            return row
+        })
+
+        cell.append(phaseTable)
+    })
 
     dialog.showModal()
 }
 
-function recursivelyGetEvolutionUI(evoTemplate, evo) {
-    let nodes = []
-    let node = evoTemplate.cloneNode(true)
-    nodes.push(node)
+function recursivelyGetEvolutionUI(evoTemplate, nodes, depth, mon, howToEvo) {
+    if (nodes.length == depth) {
+        nodes.push([])
+    }
 
-    firstEvo.evolutions.forEach(x => {
-        node = evoTemplate.cloneNode(true)
-        evo.getElementById("icon").src = getPokemonImgSrc(tectonicData.poke)
+    let node = evoTemplate.cloneNode(true)
+    let nodeMethod = node.getElementById("method")
+    node.getElementById("icon").src = getPokemonImgSrc(mon.key)
+    node.getElementById("name").innerHTML = mon.name
+    nodeMethod.innerHTML = ""
+    if (howToEvo != null) {
+        nodeMethod.innerHTML = howToEvo.method
+    }
+
+    nodes[depth].push(node)
+    mon.evolutions.forEach(evo => {
+        const evoMon = tectonicData.pokemon.get(evo.pokemon)
+        recursivelyGetEvolutionUI(evoTemplate, nodes, depth + 1, evoMon, evo)
     })
 }
 

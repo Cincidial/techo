@@ -117,15 +117,19 @@
     </div>
 
     <dialog id="pokemonModal">
-        <div id="name" class="fontExtraLarge"></div>
-        <img id="img" width="160" height="160" />
         <div>
-            <img id="type1" />
-            <img id="type2" />
+            <div id="name" class="fontExtraLarge"></div>
+            <img id="img" width="160" height="160" />
+            <div>
+                <img id="type1" />
+                <img id="type2" />
+            </div>
+            <table class="evolutionsTable">
+                <tbody>
+                    <tr id="evolutionRow" class="evolutionsTableRow"></tr>
+                </tbody>
+            </table>
         </div>
-        <table id="evolution">
-
-        </table>
     </dialog>
 </body>
 
@@ -200,8 +204,22 @@
 </template>
 
 <template id="pokemonEvolutionTemplate">
-    <img id="icon">
-    <span id="method"></span>
+    <td>
+        <table class="evolutionsTable">
+            <tbody>
+                <tr class="evolutionsTableRow">
+                    <td>
+                        <span id="method"></span>
+                    </td>
+                    <td>
+                        <img id="icon" width="75" height="75">
+                        <br>
+                        <span id="name"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </td>
 </template>
 
 </html>

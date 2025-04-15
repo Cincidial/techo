@@ -1,8 +1,11 @@
 ///////////////////////////////
 // Global Data
 ///////////////////////////////
+const goodMoveFlags = ["Sound", "Punch", "Dance", "Blade", "Biting", "Kicking", "Pulse", "Wind", "Foretold", "Bite"]
 let currentTab = document.getElementById("pokemonSheet")
 let currentTabButton = document.getElementById("pokemonButton")
+let currentFullMovesThead = null
+let currentModalMovesThead = null
 let tectonicData = {} // See main for creation of this
 
 ///////////////////////////////
@@ -29,13 +32,7 @@ async function main() {
     let items = standardFilesParser([tectonicFiles[6]], parseItems)
     let heldItems = filterToHeldItems(items)
     let pokemon = addAllTribesAndEvolutions(standardFilesParser([tectonicFiles[7]], parsePokemon))
-
     let typeChart = buildTypeChart(types)
-    buildTribesUI(tribes)
-    buildAbilitiesUI(abilities)
-    buildMovesUI(moves)
-    buildItemsUI(heldItems)
-    buildPokemonUI(pokemon, abilities, tribes)
 
     tectonicData = {
         types: types,
@@ -47,6 +44,11 @@ async function main() {
         heldItems: heldItems,
         pokemon: pokemon,
     }
+    buildTribesUI(tribes)
+    buildAbilitiesUI(abilities)
+    buildMovesUIFull(document.getElementById("movesFullTheadType"), true)
+    buildItemsUI(heldItems)
+    buildPokemonUI(pokemon, abilities, tribes)
 }
 
 ///////////////////////////////
@@ -297,7 +299,7 @@ function parsePokemon(pairs) {
         bst: 0,
         abilities: [],
         levelMoves: [], // Note that this is an object of {level, move}
-        lineMoves: [],
+        lineMoves: [], // Note that only the first evo has this
         tribes: [],
         evolutions: [], // Note that this is an object of {pokemon, method, condition}
         wildItems: [],
@@ -536,17 +538,81 @@ function buildAbilitiesUI(abilities) {
     })
 }
 
-function buildMovesUI(moves) {
-    const template = getTemplate("moveRowTemplate")
-    const table = document.getElementById("movesTable")
+function buildMovesUIFull(element) {
+    const sort = element.innerHTML
+    const asc = currentFullMovesThead != element
 
-    moves.forEach(move => {
+    currentFullMovesThead = asc ? element : null
+    buildMovesUI(tectonicData.moves, document.getElementById("movesTable"), sort, asc)
+}
+
+function buildMovesUIMon(element) {
+    const pokemon = tectonicData.pokemon.get(element.parentNode.querySelector("#moveMonKey").value)
+    const sort = element.innerHTML
+    const asc = currentModalMovesThead != element
+    const moves = new Map()
+    const firstEvo = tectonicData.pokemon.get(pokemon.firstEvolution)
+
+    pokemon.levelMoves.map(x => tectonicData.moves.get(x.move)).forEach(x => moves.set(x.key, x))
+    firstEvo.lineMoves.map(x => tectonicData.moves.get(x)).forEach(x => {
+        if (!moves.has(x.key)) {
+            moves.set(x.key, x)
+        }
+    })
+
+    currentModalMovesThead = asc ? element : null
+    buildMovesUI(moves, element.parentNode.parentNode.parentNode, sort, asc)
+}
+
+function buildMovesUI(moves, table, sort, asc) {
+    const template = getTemplate("moveRowTemplate")
+    const tbody = table.getElementsByTagName('tbody')[0]
+    const sortDirection = asc ? 1 : -1
+
+    tbody.innerHTML = ""
+    Array.from(moves.values()).sort((a, b) => {
+        switch (sort) {
+            case "Name":
+                return a.key.localeCompare(b.key) * sortDirection
+            case "Split":
+                return a.category.localeCompare(b.category) * sortDirection
+            case "Power":
+                return (a.power - b.power) * sortDirection
+            case "Acc":
+                return (a.accuracy - b.accuracy) * sortDirection
+            case "PP":
+                return (a.pp - b.pp) * sortDirection
+            case "Prio":
+                return (a.priority - b.priority) * sortDirection
+            default:
+                return a.type.localeCompare(b.type) * sortDirection
+        }
+    }).forEach(move => {
         let node = template.cloneNode(true)
         const powerText = move.power == 0 ? '-' : move.power.toString()
         const accText = move.accuracy == 0 ? '-' : move.accuracy
         const prioText = move.priority == 0 ? '-' : move.priority
 
+        let flags = move.flags.map(x => {
+            if (goodMoveFlags.includes(x)) {
+                return x
+            }
+
+            switch (x) {
+                case "HighCriticalHitRate":
+                case "VeryHighCriticalHitRate":
+                    return "Crit"
+                default:
+                    return ""
+            }
+        }).filter(x => x.length > 0)
+        if (!move.flags.includes("CanProtect")) {
+            flags.push("Skips Protections")
+        }
+        let flagsString = flags.length > 0 ? `(${flags.join(', ')})` : ""
+
         node.getElementById("name").innerHTML = move.name
+        node.getElementById("flags").innerHTML = flagsString
         node.getElementById("type").src = getTypeImgSrc(move.type)
         node.getElementById("split").src = getTypeImgSrc(move.category)
         node.getElementById("power").innerHTML = powerText
@@ -554,7 +620,7 @@ function buildMovesUI(moves) {
         node.getElementById("pp").innerHTML = move.pp
         node.getElementById("prio").innerHTML = prioText
         node.getElementById("description").innerHTML = move.description
-        table.append(node)
+        tbody.append(node)
     })
 }
 
@@ -597,6 +663,7 @@ function showPokemonModal(elementWithKey) {
     const pokemon = tectonicData.pokemon.get(elementWithKey.querySelector("#key").value)
     const firstEvo = tectonicData.pokemon.get(pokemon.firstEvolution)
 
+    const statsTemplate = getTemplate("pokemonStatsTemplate")
     const evoTemplate = getTemplate("pokemonEvolutionTemplate")
 
     const dialog = document.getElementById("pokemonModal")
@@ -612,6 +679,18 @@ function showPokemonModal(elementWithKey) {
         type2.classList.add("gone")
     }
     dialog.querySelector("#img").src = getPokemonImgSrc(pokemon.key)
+
+    const statsTable = statsTemplate.cloneNode(true)
+    const statsTableCell = dialog.querySelector("#statsTableCell")
+    setStatRowData(statsTable, "hp", pokemon.hp, 1)
+    setStatRowData(statsTable, "attack", pokemon.attack, 1)
+    setStatRowData(statsTable, "defense", pokemon.defense, 1)
+    setStatRowData(statsTable, "spa", pokemon.spAttack, 1)
+    setStatRowData(statsTable, "spd", pokemon.spDefense, 1)
+    setStatRowData(statsTable, "speed", pokemon.speed, 1)
+    setStatRowData(statsTable, "bst", pokemon.bst, 6)
+    statsTableCell.innerHTML = ""
+    statsTableCell.append(statsTable)
 
     let evolutionTree = []
     recursivelyGetEvolutionUI(evoTemplate, evolutionTree, 0, firstEvo, null)
@@ -634,7 +713,22 @@ function showPokemonModal(elementWithKey) {
         evolutionRow.innerHTML = "Does not evolve";
     }
 
+    currentModalMovesThead = null
+    dialog.querySelector("#moveMonKey").value = pokemon.key
+    buildMovesUIMon(dialog.querySelector("#monModalType"))
+
     dialog.showModal()
+}
+
+function setStatRowData(table, stat, statValue, scale) {
+    table.querySelector(`#${stat}Stat`).innerHTML = statValue
+
+    const div = table.querySelector(`#${stat}Bar`)
+    const scaledStatValue = (statValue / scale)
+    div.style.width = `${Math.round(scaledStatValue * 2.0)}px`
+
+    let colorDeg = Math.min(scaledStatValue * (0.45 + (scaledStatValue / 200)), 280)
+    div.style.backgroundColor = `hsl(${colorDeg}deg, 100%, 50%)`
 }
 
 function recursivelyGetEvolutionUI(evoTemplate, nodes, depth, mon, howToEvo) {

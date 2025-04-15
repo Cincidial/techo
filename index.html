@@ -55,16 +55,17 @@
         <table id="movesTable" class="standardTable">
             <thead>
                 <tr>
-                    <th class="standardThead">Name</th>
-                    <th class="standardThead">Type</th>
-                    <th class="standardThead">Split</th>
-                    <th class="standardThead">Power</th>
-                    <th class="standardThead">Acc</th>
-                    <th class="standardThead">PP</th>
-                    <th class="standardThead">Prio</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">Name</th>
+                    <th id="movesFullTheadType" class="clickableThead" onclick="buildMovesUIFull(this)">Type</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">Split</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">Power</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">Acc</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">PP</th>
+                    <th class="clickableThead" onclick="buildMovesUIFull(this)">Prio</th>
                     <th class="standardThead">Effect</th>
                 </tr>
             </thead>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -117,17 +118,42 @@
     </div>
 
     <dialog id="pokemonModal">
-        <div>
+        <div class="pokemonModal">
             <div id="name" class="fontExtraLarge"></div>
-            <img id="img" width="160" height="160" />
-            <div>
-                <img id="type1" />
-                <img id="type2" />
-            </div>
+            <table>
+                <tbody>
+                    <tr class="noHover">
+                        <td>
+                            <img id="img" width="160" height="160" />
+                            <div class="paddingTopSmall">
+                                <img id="type1" />
+                                <img id="type2" />
+                            </div>
+                        </td>
+                        <td id="statsTableCell" class="paddingLeftSmall"></td>
+                    </tr>
+                </tbody>
+            </table>
             <table class="evolutionsTable">
                 <tbody>
-                    <tr id="evolutionRow" class="evolutionsTableRow"></tr>
+                    <tr id="evolutionRow" class="noHover"></tr>
                 </tbody>
+            </table>
+            <table class="modalMoveTable">
+                <thead>
+                    <tr>
+                        <input type="hidden" id="moveMonKey" value="">
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Name</th>
+                        <th id="monModalType" class="clickableThead" onclick="buildMovesUIMon(this)">Type</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Split</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Power</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Acc</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">PP</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Prio</th>
+                        <th class="standardThead">Effect</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
             </table>
         </div>
     </dialog>
@@ -160,7 +186,10 @@
 
 <template id="moveRowTemplate">
     <tr>
-        <td id="name" class="fontMedium boldCell"></td>
+        <td class="fontMedium boldCell">
+            <div id="name"></div>
+            <span id="flags" class="fontFinePrint"></span>
+        </td>
         <td class="fontMedium standardCell"><img id="type" /></td>
         <td class="fontMedium standardCell"><img id="split" /></td>
         <td id="power" class="fontMedium standardCell"></td>
@@ -203,11 +232,67 @@
     </tr>
 </template>
 
+<template id="pokemonStatsTemplate">
+    <table class="statsTable">
+        <tbody>
+            <tr class="noHover">
+                <td>HP</td>
+                <td id="hpStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="hpBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>Atk</td>
+                <td id="attackStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="attackBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>Def</td>
+                <td id="defenseStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="defenseBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>SpA</td>
+                <td id="spaStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="spaBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>SpD</td>
+                <td id="spdStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="spdBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>Spe</td>
+                <td id="speedStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="speedBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+            <tr class="noHover">
+                <td>BST</td>
+                <td id="bstStat" class="paddingLeftSmall"></td>
+                <td class="paddingLeftSmall">
+                    <div id="bstBar" class="statsTableBar"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</template>
+
 <template id="pokemonEvolutionTemplate">
     <td>
         <table class="evolutionsTable">
             <tbody>
-                <tr class="evolutionsTableRow" onclick="showPokemonModal(this)">
+                <tr class="noHover" onclick="showPokemonModal(this)">
                     <input type="hidden" id="key" value="">
                     <td>
                         <span id="method"></span>

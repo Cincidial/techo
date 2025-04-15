@@ -2,6 +2,62 @@
 // Global Data
 ///////////////////////////////
 const goodMoveFlags = ["Sound", "Punch", "Dance", "Blade", "Biting", "Kicking", "Pulse", "Wind", "Foretold", "Bite"]
+const immunityAbilities = [
+    { ability: "AERODYNAMIC", type1: "FLYING" },
+    { ability: "CHALLENGER", type1: "FIGHTING" },
+    { ability: "COLDRECEPTION", type1: "ICE" },
+    { ability: "DESERTSPIRIT", type1: "GROUND" },
+    { ability: "DRAGONSLAYER", type1: "DRAGON" },
+    { ability: "FILTHY", type1: "POISON" },
+    { ability: "FIREFIGHTER", type1: "FIRE" },
+    { ability: "FLYTRAP", type1: "BUG" },
+    { ability: "FOOLHARDY", type1: "PSYCHIC" },
+    { ability: "FULLBLUBBER", type1: "WATER", type2: "ICE" },
+    { ability: "GLASSFIRING", type1: "FIRE" },
+    { ability: "HEARTLESS", type1: "FAIRY" },
+    { ability: "HEARTOFJUSTICE", type1: "DARK" },
+    { ability: "INDUSTRIALIZE", type1: "STEEL" },
+    { ability: "PECKINGORDER", type1: "FLYING" },
+    { ability: "POISONABSORB", type1: "POISON" },
+    { ability: "ROCKCLIMBER", type1: "ROCK" },
+    { ability: "STEELABSORB", type1: "STEEL" },
+    { ability: "VENOMDETTA", type1: "POISON" },
+    { ability: "LEVITATE", type1: "GROUND" },
+    { ability: "MOTORDRIVE", type1: "ELECTRIC" },
+    { ability: "SAPSIPPER", type1: "GRASS" },
+    { ability: "VOLTABSORB", type1: "ELECTRIC" },
+    { ability: "WATERABSORB", type1: "WATER" },
+    { ability: "WONDERGUARD", type1: "QMARKS" },
+]
+const halfDmgAbilities = [
+    { ability: "EXORCIST", type1: "PSYCHIC", type2: "GHOST" },
+    { ability: "FEATHERCOAT", type1: "ICE", type2: "FLYING" },
+    { ability: "REALIST", type1: "DRAGON", type2: "FAIRY" },
+    { ability: "TOUGH", type1: "FIGHTING", type2: "ROCK" },
+    { ability: "UNAFRAID", type1: "DARK", type2: "BUG" },
+    { ability: "THICKFAT", type1: "FIRE", type2: "ICE" },
+    { ability: "WATERBUBBLE", type1: "FIRE" },
+]
+const doubleTakenAbilities = [
+    { ability: "FLUFFY", type1: "FIRE" },
+    { ability: "PARANOID", type1: "PSYCHIC" },
+]
+const isAlsoTypeAbilities = [
+    { ability: "HAUNTED", type1: "GHOST" },
+    { ability: "INFECTED", type1: "GRASS" },
+    { ability: "RUSTWRACK", type1: "STEEL" },
+    { ability: "SLUGGISH", type1: "BUG" },
+]
+const doubleDealtAbilities = [
+    { ability: "DRAGONSLAYER", type1: "DRAGON" },
+]
+const doubleDealtMoves = [
+    { move: "HONORLESSSTING", type1: "FIGHTING" },
+    { move: "SLAY", type1: "DRAGON" },
+    { move: "HOLLYCHARM", type1: "GHOST" },
+    { move: "BLACKOUT", type1: "ELECTRIC" },
+]
+
 let currentTab = document.getElementById("pokemonSheet")
 let currentTabButton = document.getElementById("pokemonButton")
 let currentFullMovesThead = null
@@ -9,7 +65,7 @@ let currentModalMovesThead = null
 let tectonicData = {} // See main for creation of this
 
 ///////////////////////////////
-// Main Funcitonality
+// Main
 ///////////////////////////////
 async function main() {
     let tectonicFiles = []
@@ -44,6 +100,8 @@ async function main() {
         heldItems: heldItems,
         pokemon: pokemon,
     }
+
+    buildTypeChartSheet()
     buildTribesUI(tribes)
     buildAbilitiesUI(abilities)
     buildMovesUIFull(document.getElementById("movesFullTheadType"), true)
@@ -52,7 +110,7 @@ async function main() {
 }
 
 ///////////////////////////////
-// Data Processing
+// Data Processing & Calculations
 ///////////////////////////////
 function standardFilesParser(files, dataParser) {
     const map = new Map()
@@ -130,6 +188,103 @@ function parsePokemonTypes(pairs) {
     })
 
     return obj
+}
+
+function getRealTypes() {
+    return Array.from(tectonicData.types.values()).filter(x => x.isRealType)
+}
+
+function buildTypeChart(types) {
+    const typeChart = []
+    types.forEach(_ => {
+        typeChart.push(Array(types.size).fill(1.0))
+    })
+
+    types.forEach(attacker => {
+        types.forEach(defender => {
+            if (defender.weaknesses.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 2.0
+            } else if (defender.resistances.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 0.5
+            } else if (defender.immunities.includes(attacker.key)) {
+                typeChart[attacker.index][defender.index] = 0.0
+            }
+        })
+    })
+
+    return typeChart
+}
+
+// atk: { type: typekey, ability: abilityKey, move: moveKey}
+// def: { type1: typekey, type2: typekey, ability: abilityKey}
+function calcTypeMatchup(atk, def) {
+    const atkType = tectonicData.types.get(atk.type)
+    const defType1 = tectonicData.types.get(def.type1)
+    let thirdType = null
+
+    const defType1Calc = tectonicData.typeChart[atkType.index][defType1.index]
+    let defType2Calc = 1.0
+    let defAbilityCalc = 1.0
+    if (def.type2 != null && def.type2 != "") {
+        const defType2 = tectonicData.types.get(def.type2)
+        defType2Calc = tectonicData.typeChart[atkType.index][defType2.index]
+    }
+    if (def.ability != null) {
+        const immunityMatch = immunityAbilities.find(x => x.ability == def.ability)
+        const halfMatch = halfDmgAbilities.find(x => x.ability == def.ability)
+        const doubleMatch = doubleTakenAbilities.find(x => x.ability == def.ability)
+        const isAlsoTypeMatch = isAlsoTypeAbilities.find(x => x.ability == def.ability)
+
+        if (def.ability == "WONDERGUARD" && (defType1Calc * defType2Calc < 1)) {
+            defAbilityCalc = 0
+        } else if (def.ability == "UNFAZED" && (defType1Calc * defType2Calc == 1)) {
+            defAbilityCalc = 0.8
+        } else if (def.ability == "WELLSUITED" && (defType1Calc * defType2Calc < 1)) {
+            defAbilityCalc = 0.5
+        } else if (def.ability == "FILTER" && (defType1Calc * defType2Calc > 1)) {
+            defAbilityCalc = 0.75
+        } else if (immunityMatch !== undefined
+            && (immunityMatch.type1 == atk.type || immunityMatch.type2 == atk.type)) {
+            defAbilityCalc = 0
+        } else if (halfMatch !== undefined
+            && (halfMatch.type1 == atk.type || halfMatch.type2 == atk.type)) {
+            defAbilityCalc = 0.5
+        } else if (doubleMatch !== undefined && doubleMatch.type1 == atk.type) {
+            defAbilityCalc = 2.0
+        } else if (isAlsoTypeMatch !== undefined) {
+            const defType3 = tectonicData.types.get(isAlsoTypeMatch.type1)
+            defAbilityCalc = tectonicData.typeChart[atkType.index][defType3.index]
+            thirdType = isAlsoTypeMatch.type1
+        }
+    }
+
+    let atkAbilityCalc = 1.0
+    let atkMoveCalc = 1.0
+    if (atk.ability != null) {
+        const atkAbility = tectonicData.types.get(atk.ability)
+        if (atkAbility.flags.includes("MoldBreaking")) {
+            defAbilityCalc = 1.0
+        } else if (atk.ability == "BREAKTHROUGH") {
+            defType1Calc = defType1Calc == 0 ? 1.0 : defType1Calc
+            defType2Calc = defType2Calc == 0 ? 1.0 : defType2Calc
+            defAbilityCalc = defAbilityCalc == 0 && (thirdType != null) ? 1.0 : defAbilityCalc
+        } else if (atk.ability == "TINTEDLENS") {
+            atkAbilityCalc = defType1Calc * defType2Calc * defAbilityCalc < 1 ? 2 : 1
+        } else if (atk.ability == "EXPERTISE") {
+            atkAbilityCalc = 1.30
+        }
+    }
+    if (atk.move != null) {
+        const doubleDealtMatch = doubleDealtMoves.find(x => x.move == atk.move)
+        if (doubleDealtMatch !== undefined
+            && (doubleDealtMatch.type1 == def.type1
+                || doubleDealtMatch.type1 == def.type2
+                || doubleDealtMatch.type1 == thirdType)) {
+            atkMoveCalc = 0
+        }
+    }
+
+    return defType1Calc * defType2Calc * defAbilityCalc * atkAbilityCalc * atkMoveCalc
 }
 
 function parseTribes(file) {
@@ -423,6 +578,9 @@ function swapTab(button, newTabId) {
     currentTabButton.classList.remove("topNavButtonSelected")
     currentTabButton = button
     currentTabButton.classList.add("topNavButtonSelected")
+
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
 }
 
 function buildSpanWithTooltip(name, title) {
@@ -441,63 +599,56 @@ function getPokemonImgSrc(key) {
     return `resources/pokemon/${key}.png`
 }
 
-function buildTypeChart(types) {
+function insertTypeChartCell(row, calc, titlePrefix) {
+    const cell = row.insertCell(row.length)
+    let backgroundColor = "transparent"
+    let title = "Normal Effectiveness"
+
+    if (calc >= 4) {
+        backgroundColor = "#2E8B57"
+        title = "Hyper Effective"
+    } else if (calc >= 2) {
+        backgroundColor = "#2E8B57"
+        title = "Super Effective"
+    } else if (calc == 0) {
+        backgroundColor = "#b04f4a"
+        title = "No Effect"
+    } else if (calc < 0.5) {
+        backgroundColor = "#F7BE81"
+        title = "Barely Effective"
+        calc = calc == 0.25 ? "¼" : calc == 0.125 ? "⅛" : calc
+    } else if (calc < 1) {
+        backgroundColor = "#F7BE81"
+        title = "Not Very Effective"
+        calc = calc == 0.5 ? "½" : calc
+    }
+
+    cell.classList.add("typeChartCell")
+    cell.style.backgroundColor = backgroundColor
+    cell.title = titlePrefix + title
+    cell.innerHTML = calc == 1 ? "" : calc
+}
+
+function buildTypeChartSheet() {
     const pokemonTypeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
     const pokemonTypeChartRowTemplate = getTemplate("pokemonTypeChartRowTemplate")
-    const typeChartTableTheadRow = document.getElementById("typeChartTableTheadRow")
-    const typeChartTable = document.getElementById("typeChartTable")
-
-    const typeChart = []
-    types.forEach(_ => {
-        typeChart.push(Array(types.size).fill(1.0))
-    })
+    const table = document.getElementById("typeChartTable")
+    const types = getRealTypes()
 
     types.forEach(attacker => {
-        let imgSrc = getTypeImgSrc(attacker.key)
-        let attackerNode = pokemonTypeChartRowTemplate.cloneNode(true)
-        let row = attackerNode.getElementById("row")
-        attackerNode.getElementById("img").src = imgSrc
+        const headerNode = pokemonTypeChartHeaderTemplate.cloneNode(true)
+        headerNode.getElementById("img").src = getTypeImgSrc(attacker.key)
+        table.tHead.children[0].append(headerNode)
 
+        const attackerNode = pokemonTypeChartRowTemplate.cloneNode(true)
+        const row = attackerNode.getElementById("row")
+        attackerNode.getElementById("img").src = getTypeImgSrc(attacker.key)
         types.forEach(defender => {
-            let backgroundColor = "transparent"
-            let effectiveness = ""
-            let title = "Normal Effectiveness"
-
-            if (defender.weaknesses.includes(attacker.key)) {
-                typeChart[attacker.index][defender.index] = 2.0
-                backgroundColor = "#2E8B57"
-                effectiveness = "2"
-                title = "Super Effective"
-            } else if (defender.resistances.includes(attacker.key)) {
-                typeChart[attacker.index][defender.index] = 0.5
-                backgroundColor = "#F7BE81"
-                effectiveness = "½"
-                title = "Not Very Effective"
-            } else if (defender.immunities.includes(attacker.key)) {
-                typeChart[attacker.index][defender.index] = 0.0
-                backgroundColor = "#b04f4a"
-                effectiveness = "0"
-                title = "No Effect"
-            }
-
-            if (defender.isRealType) {
-                let cell = row.insertCell(row.length)
-                cell.classList.add("typeChartCell")
-                cell.style.backgroundColor = backgroundColor
-                cell.title = `${attacker.name} → ${defender.name} = ${title}`
-                cell.innerHTML = effectiveness
-            }
+            const calc = calcTypeMatchup({ type: attacker.key }, { type1: defender.key })
+            insertTypeChartCell(row, calc, `${attacker.name} → ${defender.name} = `)
         })
-
-        if (attacker.isRealType) {
-            let headerNode = pokemonTypeChartHeaderTemplate.cloneNode(true)
-            headerNode.getElementById("img").src = imgSrc
-            typeChartTableTheadRow.append(headerNode)
-            typeChartTable.append(attackerNode)
-        }
+        table.tBodies[0].append(attackerNode)
     })
-
-    return typeChart
 }
 
 function buildTribesUI(tribes) {
@@ -578,10 +729,9 @@ function buildMovesUIMon(element) {
 
 function buildMovesUI(moves, table, sort, asc, whenMap) {
     const template = getTemplate("moveRowTemplate")
-    const tbody = table.getElementsByTagName('tbody')[0]
     const sortDirection = asc ? 1 : -1
 
-    tbody.innerHTML = ""
+    table.tBodies[0].innerHTML = ""
     Array.from(moves.values()).sort((a, b) => {
         switch (sort) {
             case "Name":
@@ -646,7 +796,7 @@ function buildMovesUI(moves, table, sort, asc, whenMap) {
         node.getElementById("pp").innerHTML = move.pp
         node.getElementById("prio").innerHTML = prioText
         node.getElementById("description").innerHTML = move.description
-        tbody.append(node)
+        table.tBodies[0].append(node)
     })
 }
 
@@ -696,10 +846,11 @@ function showPokemonModal(elementWithKey) {
 
     const statsTemplate = getTemplate("pokemonStatsTemplate")
     const evoTemplate = getTemplate("pokemonEvolutionTemplate")
+    const typeChartHeaderTemplate = getTemplate("pokemonTypeChartHeaderTemplate")
+    const typeChartRowTemplate = getTemplate("pokemonTypeChartModalRowTemplate")
 
     const dialog = document.getElementById("pokemonModal")
     const type2 = dialog.querySelector("#type2")
-    const stabMatchups = dialog.querySelector("#stabMatchups")
     const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
@@ -727,7 +878,48 @@ function showPokemonModal(elementWithKey) {
     dialog.querySelector("#monModalAbilities").innerHTML = `${buildMonAbilitySpans(pokemon).join(", ")}`
     dialog.querySelector("#monModalTribes").innerHTML = `${buildMonTribeSpans(pokemon).join(", ")}`
 
-    stabMatchups.innerHTML = ""
+    const types = getRealTypes()
+    const matchupChartData = [
+        {
+            table: dialog.querySelector("#matchupsModalTable1"),
+            types: types.slice(0, types.length / 2)
+        },
+        {
+            table: dialog.querySelector("#matchupsModalTable2"),
+            types: types.slice(types.length / 2)
+        },
+    ]
+    matchupChartData.forEach(data => {
+        let addHeaders = data.table.tHead.children[0].children.length == 1 // Only do once
+        const abilitySpans = buildMonAbilitySpans(pokemon)
+        data.table.tBodies[0].innerHTML = ""
+
+        pokemon.abilities.forEach((ability, i) => {
+            const node = typeChartRowTemplate.cloneNode(true)
+            const row = node.getElementById("row")
+            node.getElementById("ability").innerHTML = abilitySpans[i]
+
+            data.types.forEach(attacker => {
+                if (addHeaders) {
+                    const headerNode = typeChartHeaderTemplate.cloneNode(true)
+                    headerNode.getElementById("img").src = getTypeImgSrc(attacker.key)
+                    data.table.tHead.children[0].append(headerNode)
+                }
+
+                const calc = calcTypeMatchup({ type: attacker.key },
+                    {
+                        type1: pokemon.type1,
+                        type2: pokemon.type2,
+                        ability: ability
+                    }
+                )
+                insertTypeChartCell(row, calc, "")
+
+            })
+            data.table.tBodies[0].append(node)
+            addHeaders = false
+        })
+    })
 
     let evolutionTree = []
     recursivelyGetEvolutionUI(evoTemplate, evolutionTree, 0, firstEvo, null)
@@ -755,6 +947,7 @@ function showPokemonModal(elementWithKey) {
     buildMovesUIMon(dialog.querySelector("#monModalWhen"))
 
     dialog.showModal()
+    dialog.scrollTop = 0
 }
 
 function setStatRowData(table, stat, statValue, scale) {

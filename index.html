@@ -106,7 +106,7 @@
     <div id="typeChartSheet" class="tabSheet gone">
         <table id="typeChartTable" class="typeChartTable">
             <thead>
-                <tr id="typeChartTableTheadRow">
+                <tr>
                     <th class="typeChartTopLeft">
                         Defense →
                         <br>
@@ -114,6 +114,7 @@
                     </th>
                 </tr>
             </thead>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -146,11 +147,25 @@
                 </tbody>
             </table>
             <hr>
-            <div class="fontLarge">STAB Matchups</div>
-            <div id="stabMatchups"></div>
-            <hr>
             <div class="fontLarge">Defensive Matchups</div>
-            <div id="stabMatchups"></div>
+            <br><br>
+            <table id="matchupsModalTable1" class="typeChartTable">
+                <thead>
+                    <tr>
+                        <th class="typeChartTopLeft">Ability</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <br><br>
+            <table id="matchupsModalTable2" class="typeChartTable">
+                <thead>
+                    <tr>
+                        <th class="typeChartTopLeft">Ability</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
             <hr>
             <table class="evolutionsTable">
                 <tbody>
@@ -162,15 +177,16 @@
                 <thead>
                     <tr>
                         <input type="hidden" id="moveMonKey" value="">
-                        <th id="monModalWhen" class="clickableThead" onclick="buildMovesUIMon(this)">When</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Name</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Type</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Split</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Power</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Acc</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">PP</th>
-                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Prio</th>
-                        <th class="standardThead">Effect</th>
+                        <th id="monModalWhen" class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">
+                            When</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Name</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Type</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Split</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Power</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Acc</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">PP</th>
+                        <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Prio</th>
+                        <th class="standardThead modalStickTheadTop">Effect</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -244,12 +260,20 @@
 </template>
 
 <template id="pokemonTypeChartHeaderTemplate">
-    <th id="cell" class="typeChartThead"><img id="img" /></th>
+    <th id="cell" class="typeChartThead">
+        <img id="img" />
+    </th>
 </template>
 
 <template id="pokemonTypeChartRowTemplate">
     <tr id="row">
         <td class="typeChartAttack"><img id="img" /></td>
+    </tr>
+</template>
+
+<template id="pokemonTypeChartModalRowTemplate">
+    <tr id="row">
+        <td id="ability" class="typeChartAttack paddingRightSmall"></td>
     </tr>
 </template>
 

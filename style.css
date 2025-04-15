@@ -15,7 +15,7 @@ body {
 
 thead th {
     position: sticky;
-    top: 0;
+    top: 70px;
     background-color: #212121;
 }
 
@@ -72,6 +72,10 @@ dialog:focus {
     padding-left: 8px;
 }
 
+.paddingRightSmall {
+    padding-right: 8px;
+}
+
 .paddingTopSmall {
     padding-top: 8px;
 }
@@ -101,6 +105,13 @@ dialog:focus {
     padding: 5px 10px;
     width: max-content;
     margin: auto;
+    position: sticky;
+    top: 0;
+    background-color: #212121;
+}
+
+.modalStickTheadTop {
+    top: -20px;
 }
 
 .topNavButton {
@@ -180,6 +191,7 @@ dialog:focus {
 .typeChartTopLeft {
     box-sizing: border-box;
     line-height: 1.2;
+    min-width: 80px;
 }
 
 .typeChartThead {
@@ -188,6 +200,7 @@ dialog:focus {
 
 .typeChartAttack {
     text-align: right;
+    height: 28px;
 }
 
 .typeChartCell {

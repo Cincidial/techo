@@ -47,6 +47,10 @@ dialog:focus {
     background-color: transparent
 }
 
+.noStick {
+    position: static !important;
+}
+
 .fontFinePrint {
     font-weight: normal;
     font-size: 16px;
@@ -196,6 +200,7 @@ dialog:focus {
 
 .typeChartThead {
     vertical-align: bottom;
+    position: static !important;
 }
 
 .typeChartAttack {

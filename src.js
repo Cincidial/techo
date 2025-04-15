@@ -605,7 +605,7 @@ function insertTypeChartCell(row, calc, titlePrefix) {
     let title = "Normal Effectiveness"
 
     if (calc >= 4) {
-        backgroundColor = "#2E8B57"
+        backgroundColor = "#2E8BCF"
         title = "Hyper Effective"
     } else if (calc >= 2) {
         backgroundColor = "#2E8B57"
@@ -614,7 +614,7 @@ function insertTypeChartCell(row, calc, titlePrefix) {
         backgroundColor = "#b04f4a"
         title = "No Effect"
     } else if (calc < 0.5) {
-        backgroundColor = "#F7BE81"
+        backgroundColor = "#E3649F"
         title = "Barely Effective"
         calc = calc == 0.25 ? "¼" : calc == 0.125 ? "⅛" : calc
     } else if (calc < 1) {

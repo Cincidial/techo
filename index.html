@@ -119,7 +119,7 @@
 
     <dialog id="pokemonModal">
         <div class="pokemonModal">
-            <div id="name" class="fontExtraLarge"></div>
+            <div id="name" class="fontExtraLarge bold"></div>
             <table>
                 <tbody>
                     <tr class="noHover">
@@ -131,9 +131,26 @@
                             </div>
                         </td>
                         <td id="statsTableCell" class="paddingLeftSmall"></td>
+                        <td style="width: 100%;" class="paddingLeftSmall">
+                            <div class="fontLarge bold textLeft">Abilities</div>
+                            <br><br>
+                            <div id="monModalAbilities" class="paddingLeftSmall textLeft"></div>
+
+                            <br><br><br>
+
+                            <div class="fontLarge bold textLeft">Tribes</div>
+                            <br><br>
+                            <div id="monModalTribes" class="paddingLeftSmall textLeft"></div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            <hr>
+            <div class="fontLarge">STAB Matchups</div>
+            <div id="stabMatchups"></div>
+            <hr>
+            <div class="fontLarge">Defensive Matchups</div>
+            <div id="stabMatchups"></div>
             <hr>
             <table class="evolutionsTable">
                 <tbody>
@@ -145,8 +162,9 @@
                 <thead>
                     <tr>
                         <input type="hidden" id="moveMonKey" value="">
+                        <th id="monModalWhen" class="clickableThead" onclick="buildMovesUIMon(this)">When</th>
                         <th class="clickableThead" onclick="buildMovesUIMon(this)">Name</th>
-                        <th id="monModalType" class="clickableThead" onclick="buildMovesUIMon(this)">Type</th>
+                        <th class="clickableThead" onclick="buildMovesUIMon(this)">Type</th>
                         <th class="clickableThead" onclick="buildMovesUIMon(this)">Split</th>
                         <th class="clickableThead" onclick="buildMovesUIMon(this)">Power</th>
                         <th class="clickableThead" onclick="buildMovesUIMon(this)">Acc</th>
@@ -188,6 +206,7 @@
 
 <template id="moveRowTemplate">
     <tr>
+        <td id="when" class="fontMedium standardCell gone"></td>
         <td class="fontMedium boldCell">
             <div id="name"></div>
             <span id="flags" class="fontFinePrint"></span>

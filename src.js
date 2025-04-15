@@ -48,7 +48,7 @@ async function main() {
     buildAbilitiesUI(abilities)
     buildMovesUIFull(document.getElementById("movesFullTheadType"), true)
     buildItemsUI(heldItems)
-    buildPokemonUI(pokemon, abilities, tribes)
+    buildPokemonUI(pokemon)
 }
 
 ///////////////////////////////
@@ -298,8 +298,9 @@ function parsePokemon(pairs) {
         spDefense: 0,
         bst: 0,
         abilities: [],
-        levelMoves: [], // Note that this is an object of {level, move}
+        levelMoves: new Map(), // Key of move name and value of level
         lineMoves: [], // Note that only the first evo has this
+        tutorMoves: [], // Not every mon has these
         tribes: [],
         evolutions: [], // Note that this is an object of {pokemon, method, condition}
         wildItems: [],
@@ -337,14 +338,15 @@ function parsePokemon(pairs) {
                 break
             case "Moves":
                 const moveSplit = pair.value.split(',')
-                const moves = []
                 for (let i = 0; i < moveSplit.length; i += 2) {
-                    moves.push({ level: parseInt(moveSplit[i]), move: moveSplit[i + 1] })
+                    obj.levelMoves.set(moveSplit[i + 1], parseInt(moveSplit[i]))
                 }
-                obj.levelMoves = moves
                 break
             case "LineMoves":
                 obj.lineMoves = pair.value.split(',')
+                break
+            case "TutorMoves":
+                obj.tutorMoves = pair.value.split(',')
                 break
             case "Tribes":
                 obj.tribes = pair.value.split(',')
@@ -543,7 +545,7 @@ function buildMovesUIFull(element) {
     const asc = currentFullMovesThead != element
 
     currentFullMovesThead = asc ? element : null
-    buildMovesUI(tectonicData.moves, document.getElementById("movesTable"), sort, asc)
+    buildMovesUI(tectonicData.moves, document.getElementById("movesTable"), sort, asc, null)
 }
 
 function buildMovesUIMon(element) {
@@ -551,20 +553,30 @@ function buildMovesUIMon(element) {
     const sort = element.innerHTML
     const asc = currentModalMovesThead != element
     const moves = new Map()
+    const whenMap = new Map()
     const firstEvo = tectonicData.pokemon.get(pokemon.firstEvolution)
 
-    pokemon.levelMoves.map(x => tectonicData.moves.get(x.move)).forEach(x => moves.set(x.key, x))
+    pokemon.levelMoves.forEach((v, k) => {
+        const move = tectonicData.moves.get(k)
+        moves.set(k, move)
+        whenMap.set(k, v)
+    })
     firstEvo.lineMoves.map(x => tectonicData.moves.get(x)).forEach(x => {
+        if (!moves.has(x.key)) {
+            moves.set(x.key, x)
+        }
+    })
+    pokemon.tutorMoves.map(x => tectonicData.moves.get(x)).forEach(x => {
         if (!moves.has(x.key)) {
             moves.set(x.key, x)
         }
     })
 
     currentModalMovesThead = asc ? element : null
-    buildMovesUI(moves, element.parentNode.parentNode.parentNode, sort, asc)
+    buildMovesUI(moves, element.parentNode.parentNode.parentNode, sort, asc, whenMap)
 }
 
-function buildMovesUI(moves, table, sort, asc) {
+function buildMovesUI(moves, table, sort, asc, whenMap) {
     const template = getTemplate("moveRowTemplate")
     const tbody = table.getElementsByTagName('tbody')[0]
     const sortDirection = asc ? 1 : -1
@@ -574,6 +586,16 @@ function buildMovesUI(moves, table, sort, asc) {
         switch (sort) {
             case "Name":
                 return a.key.localeCompare(b.key) * sortDirection
+            case "When":
+                if (whenMap.has(a.key) && whenMap.has(b.key)) {
+                    return (parseInt(whenMap.get(a.key)) - parseInt(whenMap.get(b.key))) * sortDirection
+                } else if (whenMap.has(a.key)) {
+                    return -1 * sortDirection
+                } else if (whenMap.has(b.key)) {
+                    return 1 * sortDirection
+                }
+
+                return a.type.localeCompare(b.type) * sortDirection
             case "Split":
                 return a.category.localeCompare(b.category) * sortDirection
             case "Power":
@@ -606,11 +628,15 @@ function buildMovesUI(moves, table, sort, asc) {
                     return ""
             }
         }).filter(x => x.length > 0)
-        if (!move.flags.includes("CanProtect")) {
-            flags.push("Skips Protections")
-        }
         let flagsString = flags.length > 0 ? `(${flags.join(', ')})` : ""
 
+        if (whenMap != null) {
+            const whenNode = node.getElementById("when")
+            const whenText = whenMap.has(move.key) ? whenMap.get(move.key) : "Teach"
+
+            whenNode.innerHTML = whenText
+            whenNode.classList.remove("gone")
+        }
         node.getElementById("name").innerHTML = move.name
         node.getElementById("flags").innerHTML = flagsString
         node.getElementById("type").src = getTypeImgSrc(move.type)
@@ -624,21 +650,26 @@ function buildMovesUI(moves, table, sort, asc) {
     })
 }
 
-function buildPokemonUI(pokemon, abilities, tribes) {
+function buildMonAbilitySpans(pokemon) {
+    return pokemon.abilities.map(x => {
+        const ability = tectonicData.abilities.get(x)
+        return buildSpanWithTooltip(ability.name, ability.description)
+    })
+}
+
+function buildMonTribeSpans(pokemon) {
+    return pokemon.tribes.map(x => {
+        const tribe = tectonicData.tribes.get(x)
+        return buildSpanWithTooltip(tribe.name, tribe.description)
+    })
+}
+
+function buildPokemonUI(pokemon) {
     const template = getTemplate("pokemonRowTemplate")
     const table = document.getElementById("pokemonTable")
 
     pokemon.forEach(mon => {
         let node = template.cloneNode(true)
-        let monAbilities = mon.abilities.map(x => {
-            const ability = abilities.get(x)
-            return buildSpanWithTooltip(ability.name, ability.description)
-        })
-        let monTribes = mon.tribes.map(x => {
-            const tribe = tribes.get(x)
-            return buildSpanWithTooltip(tribe.name, tribe.description)
-        })
-
         node.getElementById("key").value = mon.key
         node.getElementById("icon").src = getPokemonImgSrc(mon.key)
         node.getElementById("name").innerHTML = mon.name
@@ -646,8 +677,8 @@ function buildPokemonUI(pokemon, abilities, tribes) {
         if (mon.type2.length > 0) {
             node.getElementById("type2").src = getTypeImgSrc(mon.type2)
         }
-        node.getElementById("abilities").innerHTML = `${monAbilities.join("<br>")}`
-        node.getElementById("tribes").innerHTML = `${monTribes.join("<br>")}`
+        node.getElementById("abilities").innerHTML = `${buildMonAbilitySpans(mon).join("<br>")}`
+        node.getElementById("tribes").innerHTML = `${buildMonTribeSpans(mon).join("<br>")}`
         node.getElementById("hp").innerHTML = mon.hp
         node.getElementById("attack").innerHTML = mon.attack
         node.getElementById("defense").innerHTML = mon.defense
@@ -668,6 +699,7 @@ function showPokemonModal(elementWithKey) {
 
     const dialog = document.getElementById("pokemonModal")
     const type2 = dialog.querySelector("#type2")
+    const stabMatchups = dialog.querySelector("#stabMatchups")
     const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
@@ -692,6 +724,11 @@ function showPokemonModal(elementWithKey) {
     statsTableCell.innerHTML = ""
     statsTableCell.append(statsTable)
 
+    dialog.querySelector("#monModalAbilities").innerHTML = `${buildMonAbilitySpans(pokemon).join(", ")}`
+    dialog.querySelector("#monModalTribes").innerHTML = `${buildMonTribeSpans(pokemon).join(", ")}`
+
+    stabMatchups.innerHTML = ""
+
     let evolutionTree = []
     recursivelyGetEvolutionUI(evoTemplate, evolutionTree, 0, firstEvo, null)
     evolutionRow.innerHTML = ""
@@ -715,7 +752,7 @@ function showPokemonModal(elementWithKey) {
 
     currentModalMovesThead = null
     dialog.querySelector("#moveMonKey").value = pokemon.key
-    buildMovesUIMon(dialog.querySelector("#monModalType"))
+    buildMovesUIMon(dialog.querySelector("#monModalWhen"))
 
     dialog.showModal()
 }

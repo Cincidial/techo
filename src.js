@@ -444,6 +444,8 @@ function parsePokemon(pairs) {
         dexNum: "",
         type1: "",
         type2: "",
+        height: 0,
+        weight: 0,
         hp: 0,
         attack: 0,
         attack: 0,
@@ -477,6 +479,12 @@ function parsePokemon(pairs) {
                 break
             case "Type2":
                 obj.type2 = pair.value
+                break
+            case "Height":
+                obj.height = parseFloat(pair.value)
+                break
+            case "Weight":
+                obj.weight = parseFloat(pair.value)
                 break
             case "BaseStats":
                 const stats = pair.value.split(',')
@@ -854,6 +862,7 @@ function showPokemonModal(elementWithKey) {
     const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
+    dialog.querySelector("#heightWeight").innerHTML = `${pokemon.height}m 𐘹 ${pokemon.weight}lbs`
     dialog.querySelector("#type1").src = getTypeImgSrc(pokemon.type1)
     if (pokemon.type2.length > 0) {
         type2.classList.remove("gone")

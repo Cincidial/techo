@@ -150,7 +150,7 @@ dialog:focus {
     vertical-align: middle;
     box-sizing: border-box;
     border-spacing: 0px;
-    width: 800px;
+    max-width: 800px;
 }
 
 .standardThead {

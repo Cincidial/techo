@@ -195,12 +195,12 @@ dialog:focus {
 }
 
 .standardTable {
-    display: inline-block;
     text-align: center;
     vertical-align: middle;
     box-sizing: border-box;
     border-spacing: 0px;
-    max-width: 750px;
+    width: 750px;
+    margin: auto;
 }
 
 .standardThead {

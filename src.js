@@ -603,9 +603,9 @@ function swapTab(button, newTabId) {
     document.documentElement.scrollTop = 0
 }
 
-function buildSpanWithTooltip(name, title, filter, key) {
+function buildSpanWithTooltip(name, title, filter, key, addOnClick) {
     return `
-    <span class="clickable fontMedium" onclick="addPokemonFilter(this)" title="${title}">
+    <span class="clickable fontMedium" ${addOnClick ? 'onclick="addPokemonFilter(this)"' : ''} title="${title}">
         <input type="hidden" id="filter" value="${filter}" />
         <input type="hidden" id="key" value="${key}" />
         <span id="name">${name}</span>
@@ -861,17 +861,17 @@ function buildMovesUI(moves, table, sort, asc, whenMap) {
     })
 }
 
-function buildMonAbilitySpans(pokemon) {
+function buildMonAbilitySpans(pokemon, addOnClick) {
     return pokemon.abilities.map(x => {
         const ability = tectonicData.abilities.get(x)
-        return buildSpanWithTooltip(ability.name, ability.description, "ability", x)
+        return buildSpanWithTooltip(ability.name, ability.description, "ability", x, addOnClick)
     })
 }
 
-function buildMonTribeSpans(pokemon) {
+function buildMonTribeSpans(pokemon, addOnClick) {
     return pokemon.tribes.map(x => {
         const tribe = tectonicData.tribes.get(x)
-        return buildSpanWithTooltip(tribe.name, tribe.description, "tribe", x)
+        return buildSpanWithTooltip(tribe.name, tribe.description, "tribe", x, addOnClick)
     })
 }
 
@@ -985,8 +985,8 @@ function buildPokemonUI() {
         if (mon.type2.length > 0) {
             node.getElementById("type2").src = getTypeImgSrc(mon.type2)
         }
-        node.getElementById("abilities").innerHTML = `${buildMonAbilitySpans(mon).join("<br>")}`
-        node.getElementById("tribes").innerHTML = `${buildMonTribeSpans(mon).join("<br>")}`
+        node.getElementById("abilities").innerHTML = `${buildMonAbilitySpans(mon, false).join("<br>")}`
+        node.getElementById("tribes").innerHTML = `${buildMonTribeSpans(mon, false).join("<br>")}`
         node.getElementById("hp").innerHTML = mon.hp
         node.getElementById("attack").innerHTML = mon.attack
         node.getElementById("defense").innerHTML = mon.defense
@@ -1012,7 +1012,7 @@ function showPokemonModal(elementWithKey) {
     const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
-    dialog.querySelector("#heightWeight").innerHTML = `${pokemon.height}m :: ${pokemon.weight}lbs`
+    dialog.querySelector("#heightWeight").innerHTML = `${pokemon.height}M :: ${pokemon.weight}㎏`
     dialog.querySelector("#type1").src = getTypeImgSrc(pokemon.type1)
     if (pokemon.type2.length > 0) {
         type2.classList.remove("gone")
@@ -1034,8 +1034,8 @@ function showPokemonModal(elementWithKey) {
     statsTableCell.innerHTML = ""
     statsTableCell.append(statsTable)
 
-    dialog.querySelector("#monModalAbilities").innerHTML = `${buildMonAbilitySpans(pokemon).join(", ")}`
-    dialog.querySelector("#monModalTribes").innerHTML = `${buildMonTribeSpans(pokemon).join(", ")}`
+    dialog.querySelector("#monModalAbilities").innerHTML = `${buildMonAbilitySpans(pokemon, true).join(", ")}`
+    dialog.querySelector("#monModalTribes").innerHTML = `${buildMonTribeSpans(pokemon, true).join(", ")}`
 
     const types = getRealTypes()
     const matchupChartData = [
@@ -1050,7 +1050,7 @@ function showPokemonModal(elementWithKey) {
     ]
     matchupChartData.forEach(data => {
         let addHeaders = data.table.tHead.children[0].children.length == 1 // Only do once
-        const abilitySpans = buildMonAbilitySpans(pokemon)
+        const abilitySpans = buildMonAbilitySpans(pokemon, true)
         data.table.tBodies[0].innerHTML = ""
 
         pokemon.abilities.forEach((ability, i) => {

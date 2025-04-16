@@ -174,6 +174,11 @@ dialog:focus {
     display: inline-block;
 }
 
+.fitlerSpan {
+    font-size: 24px;
+    color: black;
+}
+
 .filterButton:hover {
     background-color: #5d8afb;
     color: black;
@@ -195,7 +200,7 @@ dialog:focus {
     vertical-align: middle;
     box-sizing: border-box;
     border-spacing: 0px;
-    max-width: 800px;
+    max-width: 750px;
 }
 
 .standardThead {

@@ -603,8 +603,13 @@ function swapTab(button, newTabId) {
     document.documentElement.scrollTop = 0
 }
 
-function buildSpanWithTooltip(name, title) {
-    return `<span class="clickable fontMedium" title="${title}">${name}</span>`
+function buildSpanWithTooltip(name, title, filter, key) {
+    return `
+    <span class="clickable fontMedium" onclick="addPokemonFilter(this)" title="${title}">
+        <input type="hidden" id="filter" value="${filter}" />
+        <input type="hidden" id="key" value="${key}" />
+        <span id="name">${name}</span>
+    </span>`
 }
 
 function getTypeImgSrc(key) {
@@ -678,6 +683,7 @@ function buildTribesUI(tribes) {
     tribes.forEach(tribe => {
         let node = template.cloneNode(true)
 
+        node.getElementById("key").value = tribe.key
         node.getElementById("name").innerHTML = tribe.name
         node.getElementById("description").innerHTML = tribe.description
         table.append(node)
@@ -691,6 +697,7 @@ function buildItemsUI(items) {
     items.forEach(item => {
         let node = template.cloneNode(true)
 
+        node.getElementById("key").value = item.key
         node.getElementById("icon").src = `resources/items/${item.key}.png`
         node.getElementById("name").innerHTML = item.name
         node.getElementById("description").innerHTML = item.description
@@ -737,6 +744,7 @@ function buildAbilitiesUI(filterButton) {
     abilities.forEach(ability => {
         let node = template.cloneNode(true)
 
+        node.getElementById("key").value = ability.key
         node.getElementById("name").innerHTML = ability.name
         node.getElementById("description").innerHTML = ability.description
         table.tBodies[0].append(node)
@@ -839,6 +847,7 @@ function buildMovesUI(moves, table, sort, asc, whenMap) {
             whenNode.innerHTML = whenText
             whenNode.classList.remove("gone")
         }
+        node.getElementById("key").value = move.key
         node.getElementById("name").innerHTML = move.name
         node.getElementById("flags").innerHTML = flagsString
         node.getElementById("type").src = getTypeImgSrc(move.type)
@@ -855,14 +864,14 @@ function buildMovesUI(moves, table, sort, asc, whenMap) {
 function buildMonAbilitySpans(pokemon) {
     return pokemon.abilities.map(x => {
         const ability = tectonicData.abilities.get(x)
-        return buildSpanWithTooltip(ability.name, ability.description)
+        return buildSpanWithTooltip(ability.name, ability.description, "ability", x)
     })
 }
 
 function buildMonTribeSpans(pokemon) {
     return pokemon.tribes.map(x => {
         const tribe = tectonicData.tribes.get(x)
-        return buildSpanWithTooltip(tribe.name, tribe.description)
+        return buildSpanWithTooltip(tribe.name, tribe.description, "tribe", x)
     })
 }
 
@@ -906,8 +915,31 @@ function pokemonTypeFilterOnClick(element) {
     buildPokemonUI()
 }
 
+// Element must have 3 ids. "filter" (fitler type) "key" for the key and "name" for the name
+function addPokemonFilter(element) {
+    const filter = element.querySelector("#filter").value
+    const key = element.querySelector("#key").value
+    const name = element.querySelector("#name").innerHTML
+    const node = getTemplate("pokemonFilterOtherTemplate").cloneNode(true)
+
+    node.getElementById("filter").value = filter
+    node.getElementById("key").value = key
+    node.getElementById("name").innerHTML = name
+    document.getElementById("pokemonOtherFilter").append(node)
+
+    swapTab(document.getElementById("pokemonButton"), "pokemonSheet")
+    document.getElementById("pokemonModal").close()
+    buildPokemonUI()
+}
+
+function removePokemonFilter(element) {
+    document.getElementById("pokemonOtherFilter").removeChild(element);
+    buildPokemonUI()
+}
+
 function buildPokemonUI() {
     const template = getTemplate("pokemonRowTemplate")
+    const otherFiltersDiv = document.getElementById("pokemonOtherFilter")
     const table = document.getElementById("pokemonTable")
 
     let pokemon = Array.from(tectonicData.pokemon.values())
@@ -919,6 +951,29 @@ function buildPokemonUI() {
         const type = currentType2Filter.querySelector("#key").value
         pokemon = pokemon.filter(x => x.type1 == type || x.type2 == type)
     }
+    Array.from(otherFiltersDiv.children).forEach(filter => {
+        const filterType = filter.querySelector("#filter").value
+        const key = filter.querySelector("#key").value
+
+        switch (filterType) {
+            case "tribe":
+                pokemon = pokemon.filter(x => x.tribes.includes(key))
+                break;
+            case "item":
+                pokemon = pokemon.filter(x => x.wildItems.includes(key))
+                break;
+            case "ability":
+                pokemon = pokemon.filter(x => x.abilities.includes(key))
+                break;
+            case "move":
+                pokemon = pokemon.filter(x => {
+                    return x.levelMoves.has(key)
+                        || x.tutorMoves.includes(key)
+                        || tectonicData.pokemon.get(x.firstEvolution).lineMoves.includes(key)
+                })
+                break;
+        }
+    })
 
     table.tBodies[0].innerHTML = ""
     pokemon.forEach(mon => {

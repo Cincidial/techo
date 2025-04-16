@@ -28,6 +28,8 @@
     <div id="pokemonSheet" class="tabSheet">
         <div id="pokemonTypesFilter" class="filterFlexBox"></div>
         <br>
+        <div id="pokemonOtherFilter" class="filterFlexBox"></div>
+        <br>
         <table id="pokemonTable" class="standardTable">
             <thead>
                 <tr>
@@ -231,7 +233,9 @@
 </template>
 
 <template id="moveRowTemplate">
-    <tr>
+    <tr onclick="addPokemonFilter(this)">
+        <input type="hidden" id="filter" value="move" />
+        <input type="hidden" id="key" value="" />
         <td id="when" class="fontMedium standardCell gone"></td>
         <td class="fontMedium boldCell">
             <div id="name"></div>
@@ -248,14 +252,18 @@
 </template>
 
 <template id="abilityRowTemplate">
-    <tr>
+    <tr onclick="addPokemonFilter(this)">
+        <input type="hidden" id="filter" value="ability" />
+        <input type="hidden" id="key" value="" />
         <td id="name" class="fontMedium boldCell"></td>
         <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
 </template>
 
 <template id="itemRowTemplate">
-    <tr>
+    <tr onclick="addPokemonFilter(this)">
+        <input type="hidden" id="filter" value="item" />
+        <input type="hidden" id="key" value="" />
         <td class="fontMedium standardCell"><img id="icon" /></td>
         <td id="name" class="fontMedium boldCell"></td>
         <td id="description" class="fontMedium textLeft standardCell"></td>
@@ -263,7 +271,9 @@
 </template>
 
 <template id="tribeRowTemplate">
-    <tr>
+    <tr onclick="addPokemonFilter(this)">
+        <input type="hidden" id="filter" value="tribe" />
+        <input type="hidden" id="key" value="" />
         <td id="name" class="fontMedium boldCell"></td>
         <td id="description" class="fontMedium textLeft standardCell"></td>
     </tr>
@@ -291,6 +301,15 @@
     <button type="button" class="filterButton" onclick="pokemonTypeFilterOnClick(this)">
         <input type="hidden" id="key" value="" />
         <img id="type">
+    </button>
+</template>
+
+<template id="pokemonFilterOtherTemplate">
+    <button type="button" class="filterButton" onclick="removePokemonFilter(this)">
+        <input type="hidden" id="filter" value="" />
+        <input type="hidden" id="key" value="" />
+        <span class="fitlerSpan">✕</span>
+        <span id="name" class="fitlerSpan paddingLeftSmall"></span>
     </button>
 </template>
 

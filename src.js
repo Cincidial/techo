@@ -69,6 +69,8 @@ const abiltiesWeatherFilter = { // Note also AllWeatherSynergy
 let currentTab = document.getElementById("pokemonSheet")
 let currentTabButton = document.getElementById("pokemonButton")
 let currentAbilitiesFilter = null
+let currentType1Filter = null
+let currentType2Filter = null
 let currentFullMovesThead = null
 let currentModalMovesThead = null
 let tectonicData = {} // See main for creation of this
@@ -115,7 +117,8 @@ async function main() {
     buildAbilitiesUI(null)
     buildMovesUIFull(document.getElementById("movesFullTheadType"), true)
     buildItemsUI(heldItems)
-    buildPokemonUI(pokemon)
+    buildPokemonTypesFilterUI()
+    buildPokemonUI(null)
 }
 
 ///////////////////////////////
@@ -863,10 +866,61 @@ function buildMonTribeSpans(pokemon) {
     })
 }
 
-function buildPokemonUI(pokemon) {
+function buildPokemonTypesFilterUI() {
+    const template = getTemplate("pokemonFilterTypeTemplate")
+    const typesFilter = document.getElementById("pokemonTypesFilter")
+
+    Array.from(tectonicData.types.values()).filter(x => x.isRealType).forEach(type => {
+        const node = template.cloneNode(true)
+        node.getElementById("type").src = getTypeImgSrc(type.key)
+        node.getElementById("key").value = type.key
+
+        typesFilter.append(node)
+    })
+}
+
+function pokemonTypeFilterOnClick(element) {
+    if (currentType1Filter == null) {
+        currentType1Filter = element
+        currentType1Filter.classList.add("filterButtonSelected")
+    } else if (currentType1Filter == element) {
+        currentType1Filter.classList.remove("filterButtonSelected")
+        currentType1Filter = null
+
+        if (currentType2Filter != null) {
+            currentType1Filter = currentType2Filter
+            currentType2Filter = null
+        }
+    } else if (currentType2Filter == null) {
+        currentType2Filter = element
+        currentType2Filter.classList.add("filterButtonSelected")
+    } else if (currentType2Filter == element) {
+        currentType2Filter.classList.remove("filterButtonSelected")
+        currentType2Filter = null
+    } else {
+        currentType2Filter.classList.remove("filterButtonSelected")
+        currentType2Filter = element
+        currentType2Filter.classList.add("filterButtonSelected")
+    }
+
+    buildPokemonUI()
+}
+
+function buildPokemonUI() {
     const template = getTemplate("pokemonRowTemplate")
     const table = document.getElementById("pokemonTable")
 
+    let pokemon = Array.from(tectonicData.pokemon.values())
+    if (currentType1Filter != null) {
+        const type = currentType1Filter.querySelector("#key").value
+        pokemon = pokemon.filter(x => x.type1 == type || x.type2 == type)
+    }
+    if (currentType2Filter != null) {
+        const type = currentType2Filter.querySelector("#key").value
+        pokemon = pokemon.filter(x => x.type1 == type || x.type2 == type)
+    }
+
+    table.tBodies[0].innerHTML = ""
     pokemon.forEach(mon => {
         let node = template.cloneNode(true)
         node.getElementById("key").value = mon.key
@@ -885,7 +939,7 @@ function buildPokemonUI(pokemon) {
         node.getElementById("spD").innerHTML = mon.spDefense
         node.getElementById("speed").innerHTML = mon.speed
         node.getElementById("bst").innerHTML = mon.bst
-        table.append(node)
+        table.tBodies[0].append(node)
     })
 }
 

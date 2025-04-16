@@ -26,6 +26,8 @@
     </div>
 
     <div id="pokemonSheet" class="tabSheet">
+        <div id="pokemonTypesFilter" class="filterFlexBox"></div>
+        <br>
         <table id="pokemonTable" class="standardTable">
             <thead>
                 <tr>
@@ -42,6 +44,7 @@
                     <th class="standardThead">BST</th>
                 </tr>
             </thead>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -64,16 +67,13 @@
     </div>
 
     <div id="abilitiesSheet" class="tabSheet gone">
-        <div>
+        <div class="filterFlexBox">
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Sun</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Rain</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Hail</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Sandstorm</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Moonglow</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Eclipse</button>
-        </div>
-        <br>
-        <div>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Immune</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Half Damage</button>
             <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Third Type</button>
@@ -285,6 +285,13 @@
     <tr id="row">
         <td id="ability" class="typeChartAttack paddingRightSmall"></td>
     </tr>
+</template>
+
+<template id="pokemonFilterTypeTemplate">
+    <button type="button" class="filterButton" onclick="pokemonTypeFilterOnClick(this)">
+        <input type="hidden" id="key" value="" />
+        <img id="type">
+    </button>
 </template>
 
 <template id="pokemonStatsTemplate">

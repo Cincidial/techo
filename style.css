@@ -151,6 +151,17 @@ dialog:focus {
     color: black !important;
 }
 
+.filterFlexBox {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 5px;
+    column-gap: 5px;
+    margin: auto;
+    max-width: 800px;
+}
+
 .filterButton {
     background-color: #696969;
     border-color: #FFD166;
@@ -161,7 +172,6 @@ dialog:focus {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    margin: 0px 10px;
 }
 
 .filterButton:hover {

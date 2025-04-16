@@ -16,8 +16,7 @@
 
 <body id="body">
     <div class="nav">
-        <button id="pokemonButton" type="button" class="topNavButton topNavButtonSelected"
-            onclick="swapTab(this, 'pokemonSheet')">Pokemon</button>
+        <button id="pokemonButton" type="button" class="topNavButton topNavButtonSelected" onclick="swapTab(this, 'pokemonSheet')">Pokemon</button>
         <button type="button" class="topNavButton" onclick="swapTab(this, 'movesSheet')">Moves</button>
         <button type="button" class="topNavButton" onclick="swapTab(this, 'abilitiesSheet')">Abilities</button>
         <button type="button" class="topNavButton" onclick="swapTab(this, 'itemsSheet')">Items</button>
@@ -65,6 +64,21 @@
     </div>
 
     <div id="abilitiesSheet" class="tabSheet gone">
+        <div>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Sun</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Rain</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Hail</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Sandstorm</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Moonglow</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Eclipse</button>
+        </div>
+        <br>
+        <div>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Immune</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Half Damage</button>
+            <button type="button" class="filterButton" onclick="buildAbilitiesUI(this)">Third Type</button>
+        </div>
+        <br>
         <table id="abilitiesTable" class="standardTable">
             <thead>
                 <tr>
@@ -72,6 +86,7 @@
                     <th class="standardThead">Effect</th>
                 </tr>
             </thead>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -173,8 +188,7 @@
                 <thead>
                     <tr>
                         <input type="hidden" id="moveMonKey" value="">
-                        <th id="monModalWhen" class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">
-                            When</th>
+                        <th id="monModalWhen" class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">When</th>
                         <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Name</th>
                         <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Type</th>
                         <th class="clickableThead modalStickTheadTop" onclick="buildMovesUIMon(this)">Split</th>
@@ -333,7 +347,7 @@
     <td>
         <table class="evolutionsTable">
             <tbody>
-                <tr class="noHover" onclick="showPokemonModal(this)">
+                <tr onclick="showPokemonModal(this)">
                     <input type="hidden" id="key" value="">
                     <td>
                         <span id="method"></span>

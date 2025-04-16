@@ -21,6 +21,7 @@ thead th {
 
 tr:hover {
     background-color: #FFD16677;
+    cursor: pointer;
 }
 
 dialog {
@@ -43,8 +44,17 @@ dialog:focus {
     display: none;
 }
 
+.clickable {
+    cursor: pointer !important;
+}
+
+.clickable:hover {
+    cursor: pointer !important;
+}
+
 .noHover:hover {
-    background-color: transparent
+    background-color: transparent;
+    cursor: default;
 }
 
 .noStick {
@@ -133,10 +143,35 @@ dialog:focus {
 .topNavButton:hover {
     background-color: #FFD166;
     color: black;
+    cursor: pointer;
 }
 
 .topNavButtonSelected {
     background-color: #FFD166 !important;
+    color: black !important;
+}
+
+.filterButton {
+    background-color: #696969;
+    border-color: #FFD166;
+    border-width: 3px;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0px 10px;
+}
+
+.filterButton:hover {
+    background-color: #5d8afb;
+    color: black;
+    cursor: pointer;
+}
+
+.filterButtonSelected {
+    background-color: #5d8afb !important;
     color: black !important;
 }
 
@@ -157,6 +192,7 @@ dialog:focus {
     font-size: 24px;
     padding: 5px;
     border-bottom: 1px solid #545454;
+    cursor: default;
 }
 
 .clickableThead {
@@ -168,6 +204,7 @@ dialog:focus {
 .clickableThead:hover {
     background-color: #FFD166;
     color: black;
+    cursor: pointer;
 }
 
 .standardCell {
@@ -196,22 +233,26 @@ dialog:focus {
     box-sizing: border-box;
     line-height: 1.2;
     min-width: 80px;
+    cursor: default;
 }
 
 .typeChartThead {
     vertical-align: bottom;
     position: static !important;
+    cursor: default;
 }
 
 .typeChartAttack {
     text-align: right;
     height: 28px;
+    cursor: default;
 }
 
 .typeChartCell {
     color: #000000;
     border: 1px solid #545454;
     font-size: 20px;
+    cursor: default;
 }
 
 .statsTable {

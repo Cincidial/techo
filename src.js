@@ -57,9 +57,18 @@ const doubleDealtMoves = [
     { move: "HOLLYCHARM", type1: "GHOST" },
     { move: "BLACKOUT", type1: "ELECTRIC" },
 ]
+const abiltiesWeatherFilter = { // Note also AllWeatherSynergy
+    Sun: "SunSynergy",
+    Rain: "RainstormSynergy",
+    Hail: "HailSynergy",
+    Sandstorm: "SandSynergy",
+    Moonglow: "MoonglowSynergy",
+    Eclipse: "EclipseSynergy",
+}
 
 let currentTab = document.getElementById("pokemonSheet")
 let currentTabButton = document.getElementById("pokemonButton")
+let currentAbilitiesFilter = null
 let currentFullMovesThead = null
 let currentModalMovesThead = null
 let tectonicData = {} // See main for creation of this
@@ -103,7 +112,7 @@ async function main() {
 
     buildTypeChartSheet()
     buildTribesUI(tribes)
-    buildAbilitiesUI(abilities)
+    buildAbilitiesUI(null)
     buildMovesUIFull(document.getElementById("movesFullTheadType"), true)
     buildItemsUI(heldItems)
     buildPokemonUI(pokemon)
@@ -592,7 +601,7 @@ function swapTab(button, newTabId) {
 }
 
 function buildSpanWithTooltip(name, title) {
-    return `<span class="fontMedium" title="${title}">${name}</span>`
+    return `<span class="clickable fontMedium" title="${title}">${name}</span>`
 }
 
 function getTypeImgSrc(key) {
@@ -686,16 +695,48 @@ function buildItemsUI(items) {
     })
 }
 
-function buildAbilitiesUI(abilities) {
+function buildAbilitiesUI(filterButton) {
     const template = getTemplate("abilityRowTemplate")
     const table = document.getElementById("abilitiesTable")
 
+    if (currentAbilitiesFilter != null) {
+        currentAbilitiesFilter.classList.remove("filterButtonSelected")
+
+        if (currentAbilitiesFilter != filterButton) {
+            filterButton.classList.add("filterButtonSelected")
+            currentAbilitiesFilter = filterButton
+        } else {
+            currentAbilitiesFilter = null
+        }
+    } else if (filterButton != null) {
+        filterButton.classList.add("filterButtonSelected")
+        currentAbilitiesFilter = filterButton
+    }
+
+    let abilities = Array.from(tectonicData.abilities.values())
+    if (currentAbilitiesFilter != null) {
+        const filter = currentAbilitiesFilter.innerHTML
+        if (filter in abiltiesWeatherFilter) {
+            abilities = abilities.filter(x => {
+                return x.flags.includes(abiltiesWeatherFilter[filter])
+                    || x.flags.includes("AllWeatherSynergy")
+            })
+        } else if (filter == "Immune") {
+            abilities = abilities.filter(x => immunityAbilities.find(y => y.ability == x.key))
+        } else if (filter == "Half Damage") {
+            abilities = abilities.filter(x => halfDmgAbilities.find(y => y.ability == x.key))
+        } else if (filter == "Third Type") {
+            abilities = abilities.filter(x => isAlsoTypeAbilities.find(y => y.ability == x.key))
+        }
+    }
+
+    table.tBodies[0].innerHTML = ""
     abilities.forEach(ability => {
         let node = template.cloneNode(true)
 
         node.getElementById("name").innerHTML = ability.name
         node.getElementById("description").innerHTML = ability.description
-        table.append(node)
+        table.tBodies[0].append(node)
     })
 }
 
@@ -862,7 +903,7 @@ function showPokemonModal(elementWithKey) {
     const evolutionRow = dialog.querySelector("#evolutionRow")
 
     dialog.querySelector("#name").innerHTML = pokemon.name
-    dialog.querySelector("#heightWeight").innerHTML = `${pokemon.height}m 𐘹 ${pokemon.weight}lbs`
+    dialog.querySelector("#heightWeight").innerHTML = `${pokemon.height}m :: ${pokemon.weight}lbs`
     dialog.querySelector("#type1").src = getTypeImgSrc(pokemon.type1)
     if (pokemon.type2.length > 0) {
         type2.classList.remove("gone")
@@ -939,7 +980,7 @@ function showPokemonModal(elementWithKey) {
             let phaseTable = document.createElement("table")
             phase.forEach(node => {
                 row = phaseTable.insertRow(phaseTable.rows.length)
-                row.classList.add("evolutionsTableRow")
+                row.classList.add("noHover")
                 row.append(node)
 
                 return row
